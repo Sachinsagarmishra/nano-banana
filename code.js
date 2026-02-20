@@ -24,15 +24,9 @@ figma.ui.onmessage = async (msg) => {
         try {
             const node = selection[0];
             const bytes = await node.exportAsync({ format: "PNG", constraint: { type: "SCALE", value: 2 } });
-            // Convert Uint8Array to binary string for transfer to UI
-            let binary = '';
-            const len = bytes.byteLength;
-            for (let i = 0; i < len; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
             figma.ui.postMessage({
                 type: "selection-exported",
-                data: binary,
+                data: bytes,
                 name: node.name,
                 width: ('width' in node) ? node.width : 100,
                 height: ('height' in node) ? node.height : 100
@@ -149,29 +143,52 @@ figma.ui.onmessage = async (msg) => {
         try {
             const { imageUrl, width, height } = msg;
             const image = await figma.createImageAsync(imageUrl);
-            const rect = figma.createRectangle();
-            const imgWidth = width || 1024;
-            const imgHeight = height || 1024;
-            rect.resize(imgWidth, imgHeight);
-            const viewport = figma.viewport.center;
-            rect.x = viewport.x - imgWidth / 2;
-            rect.y = viewport.y - imgHeight / 2;
-            rect.fills = [{
-                    type: "IMAGE",
-                    scaleMode: "FILL",
-                    imageHash: image.hash
-                }];
-            rect.name = "Generated Image - Nano Banana Pro";
-            figma.currentPage.appendChild(rect);
-            figma.currentPage.selection = [rect];
-            figma.viewport.scrollAndZoomIntoView([rect]);
+            const selection = figma.currentPage.selection;
+            if (selection.length > 0) {
+                // If something is selected, try to fill it
+                const node = selection[0];
+                if ("fills" in node) {
+                    const newFills = Array.isArray(node.fills) ? [...node.fills] : [];
+                    newFills.push({
+                        type: "IMAGE",
+                        scaleMode: "FILL",
+                        imageHash: image.hash
+                    });
+                    node.fills = newFills;
+                    figma.notify("✅ Image added to selection!");
+                }
+                else {
+                    // Fallback: Create new
+                    createNewImageNode(image, width, height);
+                }
+            }
+            else {
+                createNewImageNode(image, width, height);
+            }
             figma.ui.postMessage({ type: "image-placed", success: true });
-            figma.notify("✅ Image placed on canvas!", { timeout: 3000 });
         }
         catch (error) {
             figma.ui.postMessage({ type: "image-placed", success: false, error: error.message || String(error) });
             figma.notify("❌ Failed to place image: " + (error.message || error), { timeout: 5000, error: true });
         }
+    }
+    function createNewImageNode(image, width, height) {
+        const rect = figma.createRectangle();
+        const imgWidth = width || 1024;
+        const imgHeight = height || 1024;
+        rect.resize(imgWidth, imgHeight);
+        const viewport = figma.viewport.center;
+        rect.x = viewport.x - imgWidth / 2;
+        rect.y = viewport.y - imgHeight / 2;
+        rect.fills = [{
+                type: "IMAGE",
+                scaleMode: "FILL",
+                imageHash: image.hash
+            }];
+        rect.name = "Generated Image - Nano Banana Pro";
+        figma.currentPage.appendChild(rect);
+        figma.currentPage.selection = [rect];
+        figma.viewport.scrollAndZoomIntoView([rect]);
     }
     // ─── Resize UI ───
     if (msg.type === "resize") {

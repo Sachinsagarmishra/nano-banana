@@ -1957,9 +1957,9 @@
         // ─── API Base URL ───
         // When served from Vercel: relative URLs (same origin)
         // When loaded locally in Figma: set your Vercel deployment URL here
-        const VERCEL_URL = window.location.origin && !window.location.origin.includes('figma')
-            ? '' // relative — same origin on Vercel
-            : 'https://nano-banana-mu-lemon.vercel.app'; // ← YOUR VERCEL URL HERE
+        const VERCEL_URL = (window.location.hostname && (window.location.hostname.includes('vercel.app') || window.location.hostname === 'localhost'))
+            ? ''
+            : 'https://nano-banana-mu-lemon.vercel.app';
 
         const POLL_INTERVAL = 3000;
         const MAX_POLL_ATTEMPTS = 120;

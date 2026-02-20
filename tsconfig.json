@@ -4,7 +4,9 @@
         "lib": [
             "ES2017"
         ],
-        "strict": true
+        "strict": true,
+        "types": [],
+        "skipLibCheck": true
     },
     "files": [
         "node_modules/@figma/plugin-typings/index.d.ts",

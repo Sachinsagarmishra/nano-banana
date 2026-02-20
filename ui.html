@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nano Banana Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* ─── CSS Variables — Dark Mode (default) ─── */
         :root,
@@ -481,6 +482,44 @@
             pointer-events: none;
             backdrop-filter: blur(2px);
             text-transform: uppercase;
+        }
+
+        .ref-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 5;
+        }
+
+        .ref-progress-container {
+            width: 70%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+
+        .ref-progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .ref-upload-text {
+            font-size: 9px;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
         }
 
         .ref-add {
@@ -1265,7 +1304,7 @@
             <div class="header-right">
                 <div class="profile-area">
                     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"
-                        title="Toggle Light/Dark Mode">🌙</button>
+                        title="Toggle Light/Dark Mode"><i class="fa-regular fa-moon"></i></button>
                     <div class="user-circle" id="userCircle" onclick="pluginLogout()" title="Click to Logout">
                         <span id="userInitial">?</span>
                     </div>
@@ -1281,7 +1320,7 @@
             <div class="section">
                 <div class="section-header" onclick="toggleSection('reference')">
                     <div class="section-header-left">
-                        <div class="section-icon ref">🖼</div>
+                        <div class="section-icon ref"><i class="fa-regular fa-image"></i></div>
                         <span class="section-title">Reference Images</span>
                     </div>
                     <span class="section-chevron" id="chevron-reference">▼</span>
@@ -1302,9 +1341,10 @@
 
                     <!-- Tabs: Upload / Figma Selection -->
                     <div class="tabs">
-                        <button class="tab active" id="tab-upload" onclick="switchRefTab('upload')">📤 PC
-                            Upload</button>
-                        <button class="tab" id="tab-figma" onclick="switchRefTab('figma')">🎨 From Figma</button>
+                        <button class="tab active" id="tab-upload" onclick="switchRefTab('upload')"><i
+                                class="fa-regular fa-upload"></i> PC Upload</button>
+                        <button class="tab" id="tab-figma" onclick="switchRefTab('figma')"><i
+                                class="fa-regular fa-object-group"></i> From Figma</button>
                     </div>
 
                     <!-- Upload Tab Content (Help text only now) -->
@@ -1318,16 +1358,17 @@
                     <div id="tab-content-figma" class="hidden">
                         <div id="selectionArea" style="margin-top: 8px;">
                             <div class="selection-empty" id="noSelection">
-                                <div class="selection-empty-icon">🔍</div>
+                                <div class="selection-empty-icon"><i class="fa-regular fa-hourglass-half"></i></div>
                                 <div>Select an element on the canvas to use as reference</div>
                             </div>
                             <div class="selection-card hidden" id="selectionCard">
-                                <div class="selection-card-icon">🎯</div>
+                                <div class="selection-card-icon"><i class="fa-regular fa-square-check"></i></div>
                                 <div class="selection-card-info">
                                     <div class="selection-card-name" id="selectionName">-</div>
                                     <div class="selection-card-type" id="selectionType">-</div>
                                 </div>
-                                <button class="btn btn-sm" onclick="exportSelection()">📸 Capture</button>
+                                <button class="btn btn-sm" onclick="exportSelection()"><i
+                                        class="fa-regular fa-camera"></i> Capture</button>
                             </div>
                         </div>
                     </div>
@@ -1338,7 +1379,7 @@
             <div class="section">
                 <div class="section-header" onclick="toggleSection('prompt')">
                     <div class="section-header-left">
-                        <div class="section-icon prompt">✨</div>
+                        <div class="section-icon prompt"><i class="fa-regular fa-comment-dots"></i></div>
                         <span class="section-title">Prompt</span>
                     </div>
                     <span class="section-chevron" id="chevron-prompt">▼</span>
@@ -1362,7 +1403,7 @@
             <div class="section">
                 <div class="section-header" onclick="toggleSection('settings')">
                     <div class="section-header-left">
-                        <div class="section-icon settings">⚙️</div>
+                        <div class="section-icon settings"><i class="fa-regular fa-compass"></i></div>
                         <span class="section-title">Settings</span>
                     </div>
                     <span class="section-chevron" id="chevron-settings">▼</span>
@@ -1453,14 +1494,13 @@
         // ─── State ───
         const FREE_GENERATIONS = 2;
         const state = {
-            referenceImages: [],
-            figmaRefs: [],
+            referenceImages: [], // Combined uploaded and figma refs
             generatedImageUrl: null,
             isGenerating: false,
             selection: null,
             authToken: localStorage.getItem('nb_token'),
             user: null,
-            isSignUp: true, // default to signup mode
+            isSignUp: true,
             freeUsed: parseInt(localStorage.getItem('nb_free_used') || '0')
         };
 
@@ -1474,13 +1514,13 @@
             const next = current === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', next);
             localStorage.setItem('nano_banana_theme', next);
-            document.getElementById('themeToggle').textContent = next === 'dark' ? '🌙' : '☀️';
+            document.getElementById('themeToggle').innerHTML = next === 'dark' ? '<i class="fa-regular fa-moon"></i>' : '<i class="fa-regular fa-sun"></i>';
         }
 
         function initTheme() {
             const saved = localStorage.getItem('nano_banana_theme') || 'dark';
             document.documentElement.setAttribute('data-theme', saved);
-            document.getElementById('themeToggle').textContent = saved === 'dark' ? '🌙' : '☀️';
+            document.getElementById('themeToggle').innerHTML = saved === 'dark' ? '<i class="fa-regular fa-moon"></i>' : '<i class="fa-regular fa-sun"></i>';
         }
 
         // ─── Auth Functions ───
@@ -1553,7 +1593,7 @@
 
             if (state.user) {
                 const credits = state.user.credits !== undefined ? state.user.credits : '?';
-                pill.innerHTML = `✨ ${credits} credits`;
+                pill.innerHTML = `<i class="fa-regular fa-star"></i> ${credits} credits`;
                 pill.title = `${credits} credits remaining`;
 
                 // Update Initial
@@ -1562,7 +1602,7 @@
                 userCircle.title = `Logged in as ${name} (Click to Logout)`;
             } else {
                 const freeLeft = Math.max(0, FREE_GENERATIONS - state.freeUsed);
-                pill.innerHTML = `🎁 ${freeLeft} free`;
+                pill.innerHTML = `<i class="fa-regular fa-gift"></i> ${freeLeft} free`;
                 pill.title = `${freeLeft} free generation(s) remaining`;
 
                 userInitial.textContent = '?';
@@ -1600,7 +1640,7 @@
                 fileInput.addEventListener('change', (e) => {
                     const files = Array.from(e.target.files);
                     for (const file of files) {
-                        if (state.referenceImages.length + state.figmaRefs.length >= MAX_REFERENCE_IMAGES) {
+                        if (state.referenceImages.length >= MAX_REFERENCE_IMAGES) {
                             showToast('Maximum 8 reference images allowed', 'error');
                             break;
                         }
@@ -1611,11 +1651,11 @@
 
                         const reader = new FileReader();
                         reader.onload = (ev) => {
-                            state.referenceImages.push({
-                                file,
-                                dataUrl: ev.target.result
+                            addAndUploadRef({
+                                dataUrl: ev.target.result,
+                                source: 'PC',
+                                name: file.name
                             });
-                            renderRefGrid();
                         };
                         reader.onerror = () => showToast('Failed to read file', 'error');
                         reader.readAsDataURL(file);
@@ -1690,7 +1730,7 @@
         }
 
         function handleSelectionExported(msg) {
-            if (state.figmaRefs.length + state.referenceImages.length >= MAX_REFERENCE_IMAGES) {
+            if (state.referenceImages.length >= MAX_REFERENCE_IMAGES) {
                 showToast('Maximum 8 reference images allowed', 'error');
                 return;
             }
@@ -1708,12 +1748,11 @@
                 const base64 = window.btoa(binary);
                 const dataUrl = 'data:image/png;base64,' + base64;
 
-                state.figmaRefs.push({
+                addAndUploadRef({
                     dataUrl,
-                    name: msg.name,
-                    id: Date.now() + Math.random()
+                    source: 'FIGMA',
+                    name: msg.name || 'Figma Capture'
                 });
-                renderRefGrid();
                 showToast('Captured from Figma!', 'success');
             } catch (err) {
                 console.error('Export handling failed:', err);
@@ -1721,7 +1760,72 @@
             }
         }
 
+        function addAndUploadRef(ref) {
+            const id = Date.now() + Math.random();
+            const newRef = {
+                id,
+                dataUrl: ref.dataUrl,
+                source: ref.source,
+                name: ref.name,
+                status: 'uploading',
+                progress: 0,
+                uploadedUrl: null
+            };
 
+            state.referenceImages.push(newRef);
+            renderRefGrid();
+
+            // Start Upload
+            uploadRef(newRef);
+        }
+
+        async function uploadRef(ref) {
+            try {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', `${VERCEL_URL}/api/upload`, true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        ref.progress = percent;
+                        updateRefProgressUI(ref.id, percent);
+                    }
+                };
+
+                xhr.onload = () => {
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        ref.status = 'ready';
+                        ref.progress = 100;
+                        ref.uploadedUrl = data.url;
+                        renderRefGrid();
+                    } else {
+                        throw new Error('Upload failed');
+                    }
+                };
+
+                xhr.onerror = () => {
+                    ref.status = 'error';
+                    renderRefGrid();
+                    showToast('Upload failed for ' + ref.name, 'error');
+                };
+
+                xhr.send(JSON.stringify({ image: ref.dataUrl }));
+
+            } catch (err) {
+                ref.status = 'error';
+                renderRefGrid();
+                showToast('Upload error', 'error');
+            }
+        }
+
+        function updateRefProgressUI(id, percent) {
+            const fill = document.querySelector(`[data-progress-id="${id}"]`);
+            const text = document.querySelector(`[data-text-id="${id}"]`);
+            if (fill) fill.style.width = percent + '%';
+            if (text) text.textContent = percent + '%';
+        }
 
         // ─── Render Reference Grid ───
         function renderRefGrid() {
@@ -1729,50 +1833,52 @@
             if (!grid) return;
             grid.innerHTML = '';
 
-            // Render uploaded images
             state.referenceImages.forEach((ref, i) => {
                 const item = document.createElement('div');
                 item.className = 'ref-item';
-                item.innerHTML = `
-                    <img src="${ref.dataUrl}" alt="Upload" />
-                    <button class="remove-btn" onclick="removeRef('upload', ${i})">✕</button>
-                    <div class="ref-item-badge">PC</div>
-                `;
-                grid.appendChild(item);
-            });
 
-            // Render Figma captures
-            state.figmaRefs.forEach((ref, i) => {
-                const item = document.createElement('div');
-                item.className = 'ref-item';
+                let overlay = '';
+                if (ref.status === 'uploading') {
+                    overlay = `
+                        <div class="ref-overlay">
+                            <div class="ref-upload-text" data-text-id="${ref.id}">${ref.progress}%</div>
+                            <div class="ref-progress-container">
+                                <div class="ref-progress-fill" style="width: ${ref.progress}%" data-progress-id="${ref.id}"></div>
+                            </div>
+                        </div>
+                    `;
+                } else if (ref.status === 'error') {
+                    overlay = `
+                        <div class="ref-overlay" style="background: rgba(239, 68, 68, 0.7)">
+                            <div class="ref-upload-text">ERROR</div>
+                        </div>
+                    `;
+                }
+
                 item.innerHTML = `
-                    <img src="${ref.dataUrl}" alt="Figma" />
-                    <button class="remove-btn" onclick="removeRef('figma', ${i})">✕</button>
-                    <div class="ref-item-badge">Figma</div>
+                    <img src="${ref.dataUrl}" alt="${ref.name}" />
+                    ${overlay}
+                    <button class="remove-btn" onclick="removeRef(${i})">✕</button>
+                    <div class="ref-item-badge">${ref.source}</div>
                 `;
                 grid.appendChild(item);
             });
 
             // Add button
-            const total = state.referenceImages.length + state.figmaRefs.length;
-            if (total < MAX_REFERENCE_IMAGES) {
+            if (state.referenceImages.length < MAX_REFERENCE_IMAGES) {
                 const addBtn = document.createElement('button');
                 addBtn.className = 'ref-add';
                 addBtn.onclick = () => document.getElementById('fileInput').click();
                 addBtn.innerHTML = `
                     <span class="ref-add-icon">+</span>
-                    <span class="ref-add-text">Add (${total}/8)</span>
+                    <span class="ref-add-text">Add (${state.referenceImages.length}/8)</span>
                 `;
                 grid.appendChild(addBtn);
             }
         }
 
-        function removeRef(type, index) {
-            if (type === 'upload') {
-                state.referenceImages.splice(index, 1);
-            } else {
-                state.figmaRefs.splice(index, 1);
-            }
+        function removeRef(index) {
+            state.referenceImages.splice(index, 1);
             renderRefGrid();
         }
 
@@ -1851,9 +1957,9 @@
         // ─── API Base URL ───
         // When served from Vercel: relative URLs (same origin)
         // When loaded locally in Figma: set your Vercel deployment URL here
-        const VERCEL_URL = window.location.origin && !window.location.origin.includes('figma')
-            ? '' // relative — same origin on Vercel
-            : 'https://nano-banana-mu-lemon.vercel.app'; // ← YOUR VERCEL URL HERE
+        const VERCEL_URL = (window.location.hostname && (window.location.hostname.includes('vercel.app') || window.location.hostname === 'localhost'))
+            ? ''
+            : 'https://nano-banana-mu-lemon.vercel.app';
 
         const POLL_INTERVAL = 3000;
         const MAX_POLL_ATTEMPTS = 120;
@@ -1909,38 +2015,31 @@
             // Disable button
             const btn = document.getElementById('generateBtn');
             btn.disabled = true;
-            btn.innerHTML = '<span class="status-icon spinning">⏳</span><span>Generating...</span>';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin-pulse"></i><span>Generating...</span>';
             state.isGenerating = true;
 
             // Hide previous result
             document.getElementById('resultSection').classList.remove('visible');
 
             try {
-                // Step 1: Upload reference images via Vercel API
-                const allDataUrls = [];
-                for (const ref of state.referenceImages) allDataUrls.push(ref.dataUrl);
-                for (const ref of state.figmaRefs) allDataUrls.push(ref.dataUrl);
-
-                let uploadedUrls = [];
-
-                if (allDataUrls.length > 0) {
-                    showStatus('📤', 'Uploading reference images...', `0 of ${allDataUrls.length}`, true, 'indeterminate');
-
-                    for (let i = 0; i < allDataUrls.length; i++) {
-                        showStatus('📤', `Uploading image ${i + 1} of ${allDataUrls.length}...`, '', true, 'indeterminate');
-                        const url = await uploadImageToHost(allDataUrls[i]);
-                        uploadedUrls.push(url);
-                    }
-
-                    showStatus('✅', 'Images uploaded!', `${uploadedUrls.length} ready`, false, null);
+                // Check if all images are uploaded
+                const uploadingCount = state.referenceImages.filter(r => r.status === 'uploading').length;
+                if (uploadingCount > 0) {
+                    showToast('Please wait for images to finish uploading', 'error');
+                    resetGenerateBtn();
+                    return;
                 }
+
+                const uploadedUrls = state.referenceImages
+                    .filter(r => r.status === 'ready')
+                    .map(r => r.uploadedUrl);
 
                 // Step 2: Create generation task via Vercel API
                 const aspectRatio = document.getElementById('aspectRatio').value;
                 const resolution = document.getElementById('resolution').value;
                 const outputFormat = document.getElementById('outputFormat').value;
 
-                showStatus('🚀', 'Creating generation task...', 'Sending to Kie AI', true, 'indeterminate');
+                showStatus('<i class="fa-regular fa-paper-plane"></i>', 'Creating generation task...', 'Sending to Kie AI', true, 'indeterminate');
 
                 const createRes = await fetch(`${VERCEL_URL}/api/generate`, {
                     method: 'POST',
@@ -1951,12 +2050,11 @@
                     body: JSON.stringify({
                         prompt,
                         imageInput: uploadedUrls,
-                        aspectRatio,
+                        aspectRatio: aspectRatio === 'auto' ? null : aspectRatio,
                         resolution,
                         outputFormat
                     })
                 });
-
                 const createData = await createRes.json();
 
                 if (createData.code !== 200) {
@@ -1971,13 +2069,13 @@
                 }
 
                 const taskId = createData.data.taskId;
-                showStatus('⏳', 'Task created! Generating...', `Task: ${taskId.substring(0, 12)}...`, true, 'indeterminate');
+                showStatus('<i class="fa-regular fa-clock"></i>', 'Task created! Generating...', `Task: ${taskId.substring(0, 12)}...`, true, 'indeterminate');
 
                 // Step 3: Poll for results via Vercel API
                 await pollTaskStatus(taskId);
 
             } catch (error) {
-                showStatus('❌', 'Error', error.message, false, 0);
+                showStatus('<i class="fa-regular fa-circle-xmark"></i>', 'Error', error.message, false, 0);
                 showToast('Error: ' + error.message, 'error');
                 resetGenerateBtn();
             }
@@ -1990,7 +2088,7 @@
             const poll = async () => {
                 attempts++;
                 if (attempts > MAX_POLL_ATTEMPTS) {
-                    showStatus('❌', 'Timed out', 'Task took too long', false, 0);
+                    showStatus('<i class="fa-regular fa-circle-xmark"></i>', 'Timed out', 'Task took too long', false, 0);
                     showToast('Task timed out after 6 minutes', 'error');
                     resetGenerateBtn();
                     return;
@@ -2007,7 +2105,7 @@
                     const data = await res.json();
 
                     if (data.code !== 200) {
-                        showStatus('⚠️', 'Query error', data.msg || '', true, 'indeterminate');
+                        showStatus('<i class="fa-regular fa-circle-question"></i>', 'Query error', data.msg || '', true, 'indeterminate');
                         setTimeout(poll, POLL_INTERVAL);
                         return;
                     }

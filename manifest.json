@@ -14,7 +14,9 @@
             "https://static.aiquickdraw.com",
             "https://*.kie.ai",
             "https://*.aiquickdraw.com",
-            "https://0x0.st"
+            "https://0x0.st",
+            "https://nano-banana-mu-lemon.vercel.app",
+            "https://*.vercel.app"
         ]
     }
 }
