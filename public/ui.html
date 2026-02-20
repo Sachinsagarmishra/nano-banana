@@ -1527,12 +1527,13 @@
         // ─── State ───
         const FREE_GENERATIONS = 2;
         const state = {
-            referenceImages: [], // Combined uploaded and figma refs
+            referenceImages: [],
             generatedImageUrl: null,
             isGenerating: false,
             selection: null,
             authToken: localStorage.getItem('nb_token'),
-            user: null,
+            refreshToken: localStorage.getItem('nb_refresh_token'),
+            user: JSON.parse(localStorage.getItem('nb_user') || 'null'),
             isSignUp: true,
             freeUsed: parseInt(localStorage.getItem('nb_free_used') || '0')
         };
@@ -1585,8 +1586,11 @@
                 if (data.error) return showToast(data.error, 'error');
 
                 state.authToken = data.session.access_token;
+                state.refreshToken = data.session.refresh_token;
                 state.user = data.profile || data.user;
                 localStorage.setItem('nb_token', state.authToken);
+                localStorage.setItem('nb_refresh_token', state.refreshToken);
+                localStorage.setItem('nb_user', JSON.stringify(state.user));
                 showMainUI();
                 showToast(state.isSignUp ? 'Account created!' : 'Welcome back!', 'success');
             } catch (e) {
@@ -1595,16 +1599,78 @@
         }
 
         async function checkExistingSession() {
-            if (!state.authToken) return false;
+            if (!state.authToken) {
+                // No access token - try refresh if available
+                if (state.refreshToken) {
+                    return await refreshSession();
+                }
+                return false;
+            }
+
             try {
                 const res = await fetch(`${VERCEL_URL}/api/auth/profile`, {
                     headers: { 'Authorization': `Bearer ${state.authToken}` }
                 });
                 const data = await res.json();
-                if (data.error || !data.profile) { localStorage.removeItem('nb_token'); return false; }
+
+                if (data.error || !data.profile) {
+                    // Token expired — try silent refresh
+                    if (state.refreshToken) {
+                        return await refreshSession();
+                    }
+                    clearSession();
+                    return false;
+                }
+
+                // Token valid — update cached profile
                 state.user = data.profile;
+                localStorage.setItem('nb_user', JSON.stringify(state.user));
                 return true;
-            } catch (e) { return false; }
+            } catch (e) {
+                // Network error — keep cached data if available
+                return !!(state.user && state.authToken);
+            }
+        }
+
+        async function refreshSession() {
+            try {
+                const res = await fetch(`${VERCEL_URL}/api/auth/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh_token: state.refreshToken })
+                });
+                const data = await res.json();
+
+                if (data.error || !data.session) {
+                    clearSession();
+                    return false;
+                }
+
+                // Update tokens + user
+                state.authToken = data.session.access_token;
+                state.refreshToken = data.session.refresh_token;
+                state.user = data.profile || data.user;
+
+                localStorage.setItem('nb_token', state.authToken);
+                localStorage.setItem('nb_refresh_token', state.refreshToken);
+                localStorage.setItem('nb_user', JSON.stringify(state.user));
+
+                console.log('🔄 Session refreshed successfully');
+                return true;
+            } catch (e) {
+                console.warn('Session refresh failed:', e.message);
+                // Network error — keep cached data if available
+                return !!(state.user && state.authToken);
+            }
+        }
+
+        function clearSession() {
+            localStorage.removeItem('nb_token');
+            localStorage.removeItem('nb_refresh_token');
+            localStorage.removeItem('nb_user');
+            state.authToken = null;
+            state.refreshToken = null;
+            state.user = null;
         }
 
         function showMainUI() {
@@ -1679,6 +1745,8 @@
         }
 
         function showSignupWall() {
+            // Don't show signup/login if already logged in
+            if (state.user && state.authToken) return;
             state.isSignUp = true;
             document.getElementById('nameField').classList.remove('hidden');
             document.getElementById('authBtn').textContent = 'Create Free Account';
@@ -1693,11 +1761,12 @@
                 showSignupWall();
                 return;
             }
-            localStorage.removeItem('nb_token');
-            state.authToken = null;
-            state.user = null;
+            clearSession();
             document.getElementById('authOverlay').classList.remove('hidden');
             updateCreditsDisplay();
+            // Remove buy button on logout
+            const buyBtn = document.getElementById('headerBuyBtn');
+            if (buyBtn) buyBtn.remove();
         }
 
         async function buyCredits() {
@@ -1800,10 +1869,20 @@
                 });
             }
 
-            // Check if logged in
-            if (await checkExistingSession()) {
+            // Instant display from cached session (no network wait)
+            if (state.user && state.authToken) {
                 showMainUI();
             }
+
+            // Validate/refresh session in background
+            const sessionValid = await checkExistingSession();
+            if (sessionValid) {
+                showMainUI();
+            } else if (!state.user) {
+                // Session expired & refresh failed — show login
+                document.getElementById('authOverlay').classList.remove('hidden');
+            }
+
             // Always update credits display
             updateCreditsDisplay();
             renderRefGrid(); // Initial render
