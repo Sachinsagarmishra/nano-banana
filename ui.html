@@ -468,6 +468,21 @@
             opacity: 1;
         }
 
+        .ref-item-badge {
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 8px;
+            font-weight: 700;
+            pointer-events: none;
+            backdrop-filter: blur(2px);
+            text-transform: uppercase;
+        }
+
         .ref-add {
             aspect-ratio: 1;
             border: 1px dashed var(--border);
@@ -1272,31 +1287,36 @@
                     <span class="section-chevron" id="chevron-reference">▼</span>
                 </div>
                 <div class="section-body" id="body-reference">
+                    <!-- Reference Grid (Always Visible) -->
+                    <div class="ref-grid" id="refGrid">
+                        <button class="ref-add" onclick="document.getElementById('fileInput').click()">
+                            <span class="ref-add-icon">+</span>
+                            <span class="ref-add-text">Add Image</span>
+                        </button>
+                    </div>
+
+                    <input type="file" id="fileInput" class="hidden" accept="image/jpeg,image/png,image/webp"
+                        multiple />
+
+                    <div style="height: 12px;"></div>
+
                     <!-- Tabs: Upload / Figma Selection -->
                     <div class="tabs">
-                        <button class="tab active" id="tab-upload" onclick="switchRefTab('upload')">📤 Upload
-                            Image</button>
+                        <button class="tab active" id="tab-upload" onclick="switchRefTab('upload')">📤 PC
+                            Upload</button>
                         <button class="tab" id="tab-figma" onclick="switchRefTab('figma')">🎨 From Figma</button>
                     </div>
 
-                    <!-- Upload Tab Content -->
+                    <!-- Upload Tab Content (Help text only now) -->
                     <div id="tab-content-upload">
-                        <div class="ref-grid" id="refGrid">
-                            <button class="ref-add" onclick="document.getElementById('fileInput').click()">
-                                <span class="ref-add-icon">+</span>
-                                <span class="ref-add-text">Add Image</span>
-                            </button>
-                        </div>
-                        <input type="file" id="fileInput" class="hidden" accept="image/jpeg,image/png,image/webp"
-                            multiple />
-                        <div style="font-size:10px;color:var(--muted-foreground);margin-top:4px;">
+                        <div style="font-size:10px;color:var(--muted-foreground);margin-top:8px;text-align:center;">
                             Supports JPG, PNG, WebP · Max 30MB · Up to 8 images
                         </div>
                     </div>
 
                     <!-- Figma Selection Tab Content -->
                     <div id="tab-content-figma" class="hidden">
-                        <div id="selectionArea">
+                        <div id="selectionArea" style="margin-top: 8px;">
                             <div class="selection-empty" id="noSelection">
                                 <div class="selection-empty-icon">🔍</div>
                                 <div>Select an element on the canvas to use as reference</div>
@@ -1573,12 +1593,44 @@
         window.onload = async () => {
             initTheme();
             parent.postMessage({ pluginMessage: { type: 'get-selection-info' } }, '*');
+
+            // Setup file input listener safely
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    const files = Array.from(e.target.files);
+                    for (const file of files) {
+                        if (state.referenceImages.length + state.figmaRefs.length >= MAX_REFERENCE_IMAGES) {
+                            showToast('Maximum 8 reference images allowed', 'error');
+                            break;
+                        }
+                        if (file.size > MAX_FILE_SIZE) {
+                            showToast(`${file.name} is too large (max 30MB)`, 'error');
+                            continue;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = (ev) => {
+                            state.referenceImages.push({
+                                file,
+                                dataUrl: ev.target.result
+                            });
+                            renderRefGrid();
+                        };
+                        reader.onerror = () => showToast('Failed to read file', 'error');
+                        reader.readAsDataURL(file);
+                    }
+                    e.target.value = '';
+                });
+            }
+
             // Check if logged in
             if (await checkExistingSession()) {
                 showMainUI();
             }
             // Always update credits display
             updateCreditsDisplay();
+            renderRefGrid(); // Initial render
         };
 
         // ─── Messages from Plugin Backend ───
@@ -1643,48 +1695,38 @@
                 return;
             }
 
-            // data is now a Uint8Array
-            const blob = new Blob([msg.data], { type: 'image/png' });
-            const dataUrl = URL.createObjectURL(blob);
+            try {
+                // Ensure data is Uint8Array
+                const bytes = msg.data instanceof Uint8Array ? msg.data : new Uint8Array(msg.data);
 
-            state.figmaRefs.push({ dataUrl, name: msg.name });
-            renderRefGrid();
-            showToast('Element captured as reference!', 'success');
+                // Use a safer chunked conversion for large images
+                let binary = '';
+                const chunk = 1024 * 64; // 64KB chunks
+                for (let i = 0; i < bytes.length; i += chunk) {
+                    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+                }
+                const base64 = window.btoa(binary);
+                const dataUrl = 'data:image/png;base64,' + base64;
+
+                state.figmaRefs.push({
+                    dataUrl,
+                    name: msg.name,
+                    id: Date.now() + Math.random()
+                });
+                renderRefGrid();
+                showToast('Captured from Figma!', 'success');
+            } catch (err) {
+                console.error('Export handling failed:', err);
+                showToast('Failed to process capture', 'error');
+            }
         }
 
-        // ─── File Upload ───
-        document.getElementById('fileInput').addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
 
-            for (const file of files) {
-                if (state.referenceImages.length + state.figmaRefs.length >= MAX_REFERENCE_IMAGES) {
-                    showToast('Maximum 8 reference images allowed', 'error');
-                    break;
-                }
-
-                if (file.size > MAX_FILE_SIZE) {
-                    showToast(`${file.name} exceeds 30MB limit`, 'error');
-                    continue;
-                }
-
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    state.referenceImages.push({
-                        file,
-                        dataUrl: ev.target.result,
-                        uploadedUrl: null
-                    });
-                    renderRefGrid();
-                };
-                reader.readAsDataURL(file);
-            }
-
-            e.target.value = '';
-        });
 
         // ─── Render Reference Grid ───
         function renderRefGrid() {
             const grid = document.getElementById('refGrid');
+            if (!grid) return;
             grid.innerHTML = '';
 
             // Render uploaded images
@@ -1692,9 +1734,10 @@
                 const item = document.createElement('div');
                 item.className = 'ref-item';
                 item.innerHTML = `
-          <img src="${ref.dataUrl}" alt="Reference ${i + 1}" />
-          <button class="remove-btn" onclick="removeRef('upload', ${i})">✕</button>
-        `;
+                    <img src="${ref.dataUrl}" alt="Upload" />
+                    <button class="remove-btn" onclick="removeRef('upload', ${i})">✕</button>
+                    <div class="ref-item-badge">PC</div>
+                `;
                 grid.appendChild(item);
             });
 
@@ -1703,9 +1746,10 @@
                 const item = document.createElement('div');
                 item.className = 'ref-item';
                 item.innerHTML = `
-          <img src="${ref.dataUrl}" alt="${ref.name}" />
-          <button class="remove-btn" onclick="removeRef('figma', ${i})">✕</button>
-        `;
+                    <img src="${ref.dataUrl}" alt="Figma" />
+                    <button class="remove-btn" onclick="removeRef('figma', ${i})">✕</button>
+                    <div class="ref-item-badge">Figma</div>
+                `;
                 grid.appendChild(item);
             });
 
@@ -1716,9 +1760,9 @@
                 addBtn.className = 'ref-add';
                 addBtn.onclick = () => document.getElementById('fileInput').click();
                 addBtn.innerHTML = `
-          <span class="ref-add-icon">+</span>
-          <span class="ref-add-text">Add (${total}/8)</span>
-        `;
+                    <span class="ref-add-icon">+</span>
+                    <span class="ref-add-text">Add (${total}/8)</span>
+                `;
                 grid.appendChild(addBtn);
             }
         }
