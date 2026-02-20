@@ -29,16 +29,9 @@ figma.ui.onmessage = async (msg: { type: string;[key: string]: any }) => {
             const node = selection[0];
             const bytes = await node.exportAsync({ format: "PNG", constraint: { type: "SCALE", value: 2 } });
 
-            // Convert Uint8Array to binary string for transfer to UI
-            let binary = '';
-            const len = bytes.byteLength;
-            for (let i = 0; i < len; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-
             figma.ui.postMessage({
                 type: "selection-exported",
-                data: binary,
+                data: bytes,
                 name: node.name,
                 width: ('width' in node) ? (node as any).width : 100,
                 height: ('height' in node) ? (node as any).height : 100

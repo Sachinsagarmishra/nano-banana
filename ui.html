@@ -1102,12 +1102,41 @@
         }
 
         /* ─── Profile Badge ─── */
-        .profile-badge {
+        .profile-area {
             display: flex;
             align-items: center;
-            gap: 6px;
-            padding: 3px 8px 3px 3px;
-            border-radius: 20px;
+            gap: 12px;
+        }
+
+        .user-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            overflow: hidden;
+        }
+
+        .user-circle:hover {
+            border-color: var(--primary);
+            background: rgba(245, 197, 24, 0.1);
+        }
+
+        .user-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .credits-pill {
             background: var(--muted);
             border: 1px solid var(--border);
             cursor: pointer;
@@ -1219,9 +1248,13 @@
                 </div>
             </div>
             <div class="header-right">
-                <span class="header-badge">v1.0</span>
-                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"
-                    title="Toggle Light/Dark Mode">🌙</button>
+                <div class="profile-area">
+                    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"
+                        title="Toggle Light/Dark Mode">🌙</button>
+                    <div class="user-circle" id="userCircle" onclick="pluginLogout()" title="Click to Logout">
+                        <span id="userInitial">?</span>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1487,7 +1520,7 @@
         }
 
         function updateCreditsDisplay() {
-            const badgeArea = document.querySelector('.header-right');
+            const badgeArea = document.querySelector('.profile-area');
             const existingPill = document.getElementById('creditsPill');
             if (existingPill) existingPill.remove();
 
@@ -1495,14 +1528,25 @@
             pill.className = 'free-counter';
             pill.id = 'creditsPill';
 
+            const userInitial = document.getElementById('userInitial');
+            const userCircle = document.getElementById('userCircle');
+
             if (state.user) {
                 const credits = state.user.credits !== undefined ? state.user.credits : '?';
                 pill.innerHTML = `✨ ${credits} credits`;
                 pill.title = `${credits} credits remaining`;
+
+                // Update Initial
+                const name = state.user.full_name || state.user.email || 'User';
+                userInitial.textContent = name[0].toUpperCase();
+                userCircle.title = `Logged in as ${name} (Click to Logout)`;
             } else {
                 const freeLeft = Math.max(0, FREE_GENERATIONS - state.freeUsed);
                 pill.innerHTML = `🎁 ${freeLeft} free`;
                 pill.title = `${freeLeft} free generation(s) remaining`;
+
+                userInitial.textContent = '?';
+                userCircle.title = 'Guest User';
             }
             badgeArea.insertBefore(pill, badgeArea.firstChild);
         }
@@ -1599,9 +1643,9 @@
                 return;
             }
 
-            // Convert binary string to base64
-            const base64 = btoa(msg.data);
-            const dataUrl = 'data:image/png;base64,' + base64;
+            // data is now a Uint8Array
+            const blob = new Blob([msg.data], { type: 'image/png' });
+            const dataUrl = URL.createObjectURL(blob);
 
             state.figmaRefs.push({ dataUrl, name: msg.name });
             renderRefGrid();
@@ -1765,13 +1809,28 @@
         // When loaded locally in Figma: set your Vercel deployment URL here
         const VERCEL_URL = window.location.origin && !window.location.origin.includes('figma')
             ? '' // relative — same origin on Vercel
-            : ''; // ← PASTE YOUR VERCEL URL HERE after deployment, e.g. 'https://nano-banana.vercel.app'
+            : 'https://nano-banana-mu-lemon.vercel.app'; // ← YOUR VERCEL URL HERE
 
         const POLL_INTERVAL = 3000;
         const MAX_POLL_ATTEMPTS = 120;
 
         // ─── Upload image via Vercel API (server-side, no CORS issues) ───
-        async function uploadImageToHost(dataUrl) {
+        async function uploadImageToHost(url) {
+            // Fetch the image as a blob (works for both data: and blob: URLs)
+            const blobRes = await fetch(url);
+            const blob = await blobRes.blob();
+
+            // Detect MIME type
+            const mime = blob.type || 'image/png';
+            const ext = mime === 'image/jpeg' ? 'jpg' : mime === 'image/webp' ? 'webp' : 'png';
+
+            // Convert to base64 for the API
+            const reader = new FileReader();
+            const dataUrl = await new Promise((resolve) => {
+                reader.onload = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+            });
+
             const res = await fetch(`${VERCEL_URL}/api/upload`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1841,7 +1900,10 @@
 
                 const createRes = await fetch(`${VERCEL_URL}/api/generate`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': state.authToken ? `Bearer ${state.authToken}` : ''
+                    },
                     body: JSON.stringify({
                         prompt,
                         imageInput: uploadedUrls,
@@ -1893,7 +1955,11 @@
                 const elapsed = attempts * (POLL_INTERVAL / 1000);
 
                 try {
-                    const res = await fetch(`${VERCEL_URL}/api/status?taskId=${taskId}`);
+                    const res = await fetch(`${VERCEL_URL}/api/status?taskId=${taskId}`, {
+                        headers: {
+                            'Authorization': state.authToken ? `Bearer ${state.authToken}` : ''
+                        }
+                    });
                     const data = await res.json();
 
                     if (data.code !== 200) {
