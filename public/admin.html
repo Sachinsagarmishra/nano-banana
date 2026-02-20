@@ -673,6 +673,20 @@
                         <div class="stat-label">Admins</div>
                         <div class="stat-value" id="statAdmins">—</div>
                     </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Active MRR</div>
+                        <div class="stat-value" id="statMRR" style="color:var(--success)">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Projected ARR</div>
+                        <div class="stat-value" id="statARR" style="color:var(--success)">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Cancelled MRR</div>
+                        <div class="stat-value" id="statCancelledMRR" style="color:var(--danger)">—</div>
+                        <div style="font-size:11px; margin-top:4px; color:var(--muted-foreground);"
+                            id="statCancelledUsers">— users</div>
+                    </div>
                 </div>
 
                 <!-- Recent Users Preview -->
@@ -1000,11 +1014,16 @@
                 if (data.error) return toast(data.error, 'error');
 
                 const { profiles, stats } = data;
+                // Profile stats
                 document.getElementById('userCount').textContent = stats.totalUsers;
                 document.getElementById('statUsers').textContent = stats.totalUsers;
                 document.getElementById('statActive').textContent = stats.activeUsers;
                 document.getElementById('statGenerations').textContent = stats.totalGenerations;
                 document.getElementById('statAdmins').textContent = stats.admins;
+                document.getElementById('statMRR').textContent = '$' + (stats.mrr || 0).toFixed(2);
+                document.getElementById('statARR').textContent = '$' + (stats.arr || 0).toFixed(2);
+                document.getElementById('statCancelledMRR').textContent = '$' + (stats.cancelledMRR || 0).toFixed(2);
+                document.getElementById('statCancelledUsers').textContent = `${stats.cancelledUsers || 0} users cancelling`;
 
                 // Full table
                 document.getElementById('usersTable').innerHTML = profiles.map(p => `
@@ -1020,7 +1039,7 @@
             </td>
             <td><span class="role-badge ${p.role}">${p.role}</span></td>
             <td>${p.credits}</td>
-            <td>${p.active_plan_name ? `<span style="color:var(--accent);font-size:11px;font-weight:600;">${p.active_plan_name}</span>` : '<span style="color:var(--fg3);font-size:11px;">No Plan</span>'}</td>
+            <td>${p.active_plan_name ? `<span style="color:var(--accent);font-size:11px;font-weight:600;">${p.active_plan_name}</span>${p.subscription_cancelled ? '<br><span style="color:var(--danger);font-size:10px;">Cancelling</span>' : ''}` : '<span style="color:var(--fg3);font-size:11px;">No Plan</span>'}</td>
             <td>${p.total_generations}</td>
             <td><span class="status-dot ${p.is_active ? 'active' : 'inactive'}"></span>${p.is_active ? 'Active' : 'Inactive'}</td>
             <td>
@@ -1028,7 +1047,8 @@
                 ${p.role !== 'super_admin' ? `
                   <button class="btn btn-sm" onclick="toggleUserActive('${p.id}', ${!p.is_active})">${p.is_active ? '<i class="fa-solid fa-circle-xmark"></i>' : '<i class="fa-solid fa-circle-check"></i>'}</button>
                   <button class="btn btn-sm" onclick="changeRole('${p.id}', '${p.role}')">${p.role === 'admin' ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-solid fa-shield"></i>'}</button>
-                  <button class="btn btn-sm" onclick="addCredits('${p.id}', ${p.credits})"><i class="fa-solid fa-credit-card"></i></button>
+                  <button class="btn btn-sm" onclick="addCredits('${p.id}', ${p.credits})" title="Add Credits"><i class="fa-solid fa-credit-card"></i></button>
+                  ${currentUser.role === 'super_admin' && p.active_plan_name && !p.subscription_cancelled ? `<button class="btn btn-sm" style="color:var(--warning);" onclick="adminCancelSubscription('${p.id}', '${p.active_plan_name}', '${p.email}')" title="Cancel Subscription"><i class="fa-solid fa-ban"></i></button>` : ''}
                   ${currentUser.role === 'super_admin' ? `<button class="btn btn-sm" style="color:var(--destructive);" onclick="deleteUser('${p.id}', '${p.email}')" title="Delete User"><i class="fa-solid fa-trash"></i></button>` : ''}
                 ` : '<span style="color:var(--fg3);font-size:11px;">Owner</span>'}
               </div>
@@ -1097,6 +1117,30 @@
             });
             toast(`Credits updated to ${newCredits}`, 'success');
             loadUsers();
+        }
+
+        async function adminCancelSubscription(userId, planName, email) {
+            const confirmed = confirm(`Are you sure you want to cancel the ${planName} subscription for ${email}?\n\nThey will retain credits until the end of their billing period, but will not be charged again. This is applied via Dodo Payments.`);
+            if (!confirmed) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/users`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ userId, cancel_subscription: true })
+                });
+
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+
+                toast(`Subscription for ${email} cancelled`, 'success');
+                loadUsers();
+            } catch (err) {
+                toast(`Failed to cancel subscription: ${err.message}`, 'error');
+            }
         }
 
         async function deleteUser(userId, email) {
