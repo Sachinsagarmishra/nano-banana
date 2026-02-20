@@ -57,18 +57,22 @@ module.exports = async function handler(req, res) {
         // Payment success or subscription active events
         if (event.type === 'payment.succeeded' || event.type === 'subscription.active' || event.data?.status === 'succeeded' || event.data?.status === 'active') {
             const userId = data.metadata?.userId || (data.customer && data.customer.metadata?.userId);
-            if (userId) {
-                // Determine how many credits to add.
-                // Could be hardcoded for the plan or derived from amount
-                const creditsToAdd = 1000; // Adding 1000 credits for the monthly plan
+            let creditsStr = data.metadata?.credits || (data.customer && data.customer.metadata?.credits);
 
-                // Update user credits
-                const { data: userProfile } = await supabase.from('profiles').select('credits').eq('id', userId).single();
-                if (userProfile) {
-                    await supabase.from('profiles').update({
-                        credits: userProfile.credits + creditsToAdd
-                    }).eq('id', userId);
-                    console.log(`Added ${creditsToAdd} credits to user ${userId}`);
+            if (userId) {
+                const creditsToAdd = parseInt(creditsStr) || 0;
+
+                if (creditsToAdd > 0) {
+                    // Update user credits
+                    const { data: userProfile } = await supabase.from('profiles').select('credits').eq('id', userId).single();
+                    if (userProfile) {
+                        await supabase.from('profiles').update({
+                            credits: (userProfile.credits || 0) + creditsToAdd
+                        }).eq('id', userId);
+                        console.log(`Added ${creditsToAdd} credits to user ${userId}`);
+                    }
+                } else {
+                    console.log(`Webhook valid for user ${userId}, but no credits metadata found to add.`);
                 }
             } else {
                 console.warn("No userId found in webhook metadata.");

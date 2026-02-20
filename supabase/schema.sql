@@ -148,3 +148,24 @@ create policy "Admins can view all logs"
 --    WHERE email = 'YOUR_EMAIL_HERE';
 --
 -- ================================================
+
+-- 7. Subscription Plans
+create table if not exists public.subscription_plans (
+  id uuid default gen_random_uuid() primary key,
+  name text not null,
+  dodo_product_id text not null,
+  credits integer not null,
+  price_string text default '',
+  is_active boolean default true,
+  created_at timestamptz default now()
+);
+
+alter table public.subscription_plans enable row level security;
+
+create policy "Anyone can read active plans"
+  on public.subscription_plans for select
+  using (is_active = true or exists (select 1 from public.profiles where id = auth.uid() and role in ('admin', 'super_admin')));
+
+create policy "Admins can manage plans"
+  on public.subscription_plans for all
+  using (exists (select 1 from public.profiles where id = auth.uid() and role in ('admin', 'super_admin')));

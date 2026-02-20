@@ -1307,6 +1307,19 @@
         </div>
     </div>
 
+    <!-- Plans Overlay -->
+    <div class="overlay hidden" id="plansOverlay" style="background: var(--bg); z-index: 1000; padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 style="font-size: 18px; font-weight: 700;">Select a Plan</h2>
+            <button class="btn btn-sm" onclick="document.getElementById('plansOverlay').classList.add('hidden')"><i
+                    class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="plansList"
+            style="display: flex; flex-direction: column; gap: 12px; overflow-y: auto; max-height: calc(100vh - 100px); padding-bottom: 24px;">
+            <div style="text-align:center; padding: 20px; color: var(--muted-foreground);">Loading plans...</div>
+        </div>
+    </div>
+
     <div class="app">
         <!-- Toast Container -->
         <div class="toast-container" id="toastContainer"></div>
@@ -1692,8 +1705,41 @@
                 showSignupWall();
                 return;
             }
+            document.getElementById('plansOverlay').classList.remove('hidden');
+            document.getElementById('plansList').innerHTML = '<div style="text-align:center; padding: 20px; color: var(--muted-foreground);">Loading plans...</div>';
 
+            try {
+                const res = await fetch(`${VERCEL_URL}/api/subscriptions`);
+                const data = await res.json();
+
+                if (data.error || !data.plans) {
+                    throw new Error(data.error || 'Failed to load plans');
+                }
+
+                if (data.plans.length === 0) {
+                    document.getElementById('plansList').innerHTML = '<div style="text-align:center; padding: 20px; color: var(--muted-foreground);">No plans currently available.</div>';
+                    return;
+                }
+
+                document.getElementById('plansList').innerHTML = data.plans.map(p => `
+                    <div style="border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="font-weight: 600; font-size: 15px;">${p.name}</div>
+                            <div style="font-weight: 700; font-size: 15px; color: var(--accent);">${p.price_string || ''}</div>
+                        </div>
+                        <div style="font-size: 13px; color: var(--muted-foreground);"><i class="fa-solid fa-star" style="color:var(--accent); font-size:10px; margin-right:4px;"></i>${p.credits} credits per month</div>
+                        <button class="btn btn-primary" style="margin-top: 8px; width: 100%; padding: 10px;" onclick="checkoutPlan('${p.id}')">Subscribe</button>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                document.getElementById('plansList').innerHTML = `<div style="text-align:center; padding: 20px; color: var(--destructive);">${err.message}</div>`;
+            }
+        }
+
+        async function checkoutPlan(planId) {
             showToast('Initiating secure checkout...', 'info');
+            document.getElementById('plansOverlay').classList.add('hidden');
 
             try {
                 const res = await fetch(`${VERCEL_URL}/api/payments/create-checkout`, {
@@ -1701,7 +1747,8 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${state.authToken}`
-                    }
+                    },
+                    body: JSON.stringify({ planId })
                 });
 
                 const data = await res.json();

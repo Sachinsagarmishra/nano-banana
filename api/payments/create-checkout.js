@@ -17,12 +17,18 @@ module.exports = async function handler(req, res) {
             settingsData.forEach(s => settings[s.key] = s.value);
         }
 
+        const { planId } = req.body || {};
+        if (!planId) return res.status(400).json({ error: 'Subscription plan ID is required' });
+
+        const { data: plan, error: planError } = await supabase.from('subscription_plans').select('*').eq('id', planId).single();
+        if (planError || !plan) return res.status(404).json({ error: 'Subscription plan not found' });
+
         const isTestMode = settings.dodo_environment === 'test_mode';
         const apiKey = isTestMode ? settings.dodo_test_secret_key : settings.dodo_live_secret_key;
-        const productId = settings.dodo_product_id;
+        const productId = plan.dodo_product_id;
 
         if (!apiKey || !productId) {
-            return res.status(400).json({ error: 'Payments are not fully configured yet.' });
+            return res.status(400).json({ error: 'Payments or plan not fully configured yet.' });
         }
 
         const client = new DodoPayments({
@@ -54,9 +60,11 @@ module.exports = async function handler(req, res) {
                     quantity: 1,
                 }
             ],
-            // Pass user id to know who paid for it in the webhook
+            // Pass user id and credit metadata to know who paid and what they bought.
             metadata: {
-                userId: user.id
+                userId: user.id,
+                planId: String(plan.id),
+                credits: String(plan.credits)
             },
             returnUrl: `${origin}?payment=success`,
         });
