@@ -902,27 +902,29 @@
         /* ─── Toast ─── */
         .toast-container {
             position: fixed;
-            top: 12px;
+            bottom: 12px;
             left: 12px;
             right: 12px;
-            z-index: 1000;
+            z-index: 2000;
             display: flex;
-            flex-direction: column;
-            gap: 6px;
+            flex-direction: column-reverse;
+            gap: 4px;
             pointer-events: none;
         }
 
         .toast {
-            padding: 10px 14px;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             pointer-events: auto;
             animation: toastIn 0.3s ease-out;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            max-width: 320px;
+            margin: 0 auto;
         }
 
         .toast.success {
@@ -946,13 +948,87 @@
         @keyframes toastIn {
             from {
                 opacity: 0;
-                transform: translateY(-10px);
+                transform: translateY(10px);
             }
 
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
+        }
+
+        /* ─── User Menu Dropdown ─── */
+        .user-menu {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            background: #1a1a1e;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            min-width: 180px;
+            padding: 6px 0;
+            z-index: 500;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            display: none;
+            animation: slideUp 0.15s ease;
+        }
+
+        .user-menu.show {
+            display: block;
+        }
+
+        .user-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            font-size: 12px;
+            color: var(--foreground);
+            cursor: pointer;
+            transition: background 0.15s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .user-menu-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .user-menu-item.danger {
+            color: var(--destructive);
+        }
+
+        .user-menu-item.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .user-menu-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 4px 0;
+        }
+
+        [data-theme="light"] .user-menu {
+            background: #fff;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Active plan tag */
+        .plan-active-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         /* ─── Divider ─── */
@@ -1645,11 +1721,28 @@
                 </div>
             </div>
             <div class="header-right">
-                <div class="profile-area">
+                <div class="profile-area" style="position: relative;">
                     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"
                         title="Toggle Light/Dark Mode"><i class="fa-solid fa-moon"></i></button>
-                    <div class="user-circle" id="userCircle" onclick="pluginLogout()" title="Click to Logout">
+                    <div class="user-circle" id="userCircle" onclick="toggleUserMenu()" title="Account">
                         <span id="userInitial">?</span>
+                    </div>
+                    <!-- User Dropdown Menu -->
+                    <div class="user-menu" id="userMenu">
+                        <div style="padding: 8px 14px; font-size: 11px; color: var(--muted-foreground);"
+                            id="userMenuEmail">Account</div>
+                        <div class="user-menu-divider"></div>
+                        <button class="user-menu-item" onclick="buyCredits(); closeUserMenu();">
+                            <i class="fa-solid fa-bolt"></i> Top Up Credits
+                        </button>
+                        <button class="user-menu-item" id="cancelPlanBtn" style="display:none;"
+                            onclick="cancelSubscription(); closeUserMenu();">
+                            <i class="fa-solid fa-ban"></i> Cancel Plan
+                        </button>
+                        <div class="user-menu-divider"></div>
+                        <button class="user-menu-item danger" onclick="pluginLogout(); closeUserMenu();">
+                            <i class="fa-solid fa-right-from-bracket"></i> Logout
+                        </button>
                     </div>
                 </div>
             </div>
@@ -2029,7 +2122,17 @@
                 const existingLogin = document.getElementById('headerLoginBtn');
                 if (existingLogin) existingLogin.remove();
 
-                userCircle.title = `Logged in as ${name} (Click to Logout)`;
+                userCircle.title = `${name} - Account Menu`;
+
+                // Update user menu email
+                const menuEmail = document.getElementById('userMenuEmail');
+                if (menuEmail) menuEmail.textContent = state.user.email || name;
+
+                // Show/hide cancel plan button
+                const cancelBtn = document.getElementById('cancelPlanBtn');
+                if (cancelBtn) {
+                    cancelBtn.style.display = state.user.dodo_subscription_id && !state.user.subscription_cancelled ? 'flex' : 'none';
+                }
             } else {
                 const freeLeft = Math.max(0, FREE_GENERATIONS - state.freeUsed);
                 pill.innerHTML = `<i class="fa-solid fa-gift"></i> ${freeLeft} free`;
@@ -2072,11 +2175,80 @@
                 return;
             }
             clearSession();
+            closeUserMenu();
             document.getElementById('authOverlay').classList.remove('hidden');
             updateCreditsDisplay();
             // Remove buy button on logout
             const buyBtn = document.getElementById('headerBuyBtn');
             if (buyBtn) buyBtn.remove();
+        }
+
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            if (!menu) return;
+            if (!state.user) {
+                showSignupWall();
+                return;
+            }
+            menu.classList.toggle('show');
+        }
+
+        function closeUserMenu() {
+            const menu = document.getElementById('userMenu');
+            if (menu) menu.classList.remove('show');
+        }
+
+        // Close menu on outside click
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('userMenu');
+            const circle = document.getElementById('userCircle');
+            if (menu && !menu.contains(e.target) && !circle.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
+
+        async function cancelSubscription() {
+            if (!state.user || !state.user.dodo_subscription_id) {
+                showToast('No active subscription to cancel', 'error');
+                return;
+            }
+
+            const confirmCancel = confirm(
+                'Are you sure you want to cancel your plan?\n\n' +
+                '• Your current month\'s credits will remain active\n' +
+                '• Cancellation takes effect from next billing cycle\n' +
+                '• You won\'t be charged again'
+            );
+
+            if (!confirmCancel) return;
+
+            showToast('Cancelling subscription...', 'info');
+
+            try {
+                const res = await fetch(`${VERCEL_URL}/api/payments/cancel`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${state.authToken}`
+                    }
+                });
+
+                const data = await res.json();
+                if (data.error) {
+                    showToast(data.error, 'error');
+                    return;
+                }
+
+                // Update local state
+                state.user.subscription_cancelled = true;
+                localStorage.setItem('nb_user', JSON.stringify(state.user));
+
+                showToast('Plan cancelled! Credits remain active until end of billing period.', 'success');
+                updateCreditsDisplay();
+            } catch (err) {
+                console.error('Cancel error:', err);
+                showToast('Failed to cancel: ' + err.message, 'error');
+            }
         }
 
         async function buyCredits() {
@@ -2105,18 +2277,27 @@
                     return;
                 }
 
-                document.getElementById('plansList').innerHTML = data.plans.map(p => `
-                    <div class="plan-card" onclick="checkoutPlan('${p.id}')">
+                document.getElementById('plansList').innerHTML = data.plans.map(p => {
+                    const isActive = state.user && state.user.active_plan_id && String(state.user.active_plan_id) === String(p.id);
+                    const isCancelled = isActive && state.user.subscription_cancelled;
+                    return `
+                    <div class="plan-card" onclick="${isActive ? '' : `checkoutPlan('${p.id}')`}" style="${isActive ? 'border-color: rgba(34, 197, 94, 0.4); cursor: default;' : ''}">
                         <div class="plan-card-left">
-                            <div class="plan-card-name">${p.name}</div>
+                            <div class="plan-card-name">
+                                ${p.name}
+                                ${isActive ? `<span class="plan-active-tag">✓ ${isCancelled ? 'Cancelling' : 'Current Plan'}</span>` : ''}
+                            </div>
                             <div class="plan-card-credits">⚡ ${p.credits} Credits</div>
                         </div>
                         <div class="plan-card-right">
                             <div class="plan-card-price">${p.price_string || ''}</div>
-                            <button class="plan-select-btn" onclick="event.stopPropagation(); checkoutPlan('${p.id}')">Select</button>
+                            ${isActive
+                            ? `<span style="font-size:11px;color:#22c55e;font-weight:600;">Active</span>`
+                            : `<button class="plan-select-btn" onclick="event.stopPropagation(); checkoutPlan('${p.id}')">Select</button>`
+                        }
                         </div>
                     </div>
-                `).join('');
+                `}).join('');
 
             } catch (err) {
                 document.getElementById('plansList').innerHTML = `<div class="plans-loading" style="color: var(--destructive);">${err.message}</div>`;

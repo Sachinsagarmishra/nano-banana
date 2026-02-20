@@ -13,6 +13,9 @@ create table if not exists public.profiles (
   credits integer default 0,
   total_generations integer default 0,
   is_active boolean default true,
+  active_plan_id uuid,
+  dodo_subscription_id text,
+  subscription_cancelled boolean default false,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
