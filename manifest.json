@@ -1,0 +1,20 @@
+{
+    "name": "Nano Banana Pro by sachindesign.com",
+    "id": "nano-banana-pro-ai-generator",
+    "api": "1.0.0",
+    "main": "code.js",
+    "ui": "ui.html",
+    "documentAccess": "dynamic-page",
+    "editorType": [
+        "figma"
+    ],
+    "networkAccess": {
+        "allowedDomains": [
+            "https://api.kie.ai",
+            "https://static.aiquickdraw.com",
+            "https://*.kie.ai",
+            "https://*.aiquickdraw.com",
+            "https://0x0.st"
+        ]
+    }
+}

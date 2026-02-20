@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nano Banana Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        /* ─── CSS Variables — Dark Mode (default) ─── */
+        :root,
+        [data-theme="dark"] {
+            --background: #09090b;
+            --foreground: #fafafa;
+            --card: #0a0a0f;
+            --card-foreground: #fafafa;
+            --popover: #09090b;
+            --popover-foreground: #fafafa;
+            --primary: #f5c518;
+            --primary-foreground: #09090b;
+            --secondary: #1a1a2e;
+            --secondary-foreground: #fafafa;
+            --muted: #18181b;
+            --muted-foreground: #a1a1aa;
+            --accent: #27272a;
+            --accent-foreground: #fafafa;
+            --destructive: #ef4444;
+            --destructive-foreground: #fafafa;
+            --border: #27272a;
+            --input: #27272a;
+            --ring: #f5c518;
+            --radius: 8px;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+        }
+
+        /* ─── CSS Variables — Light Mode ─── */
+        [data-theme="light"] {
+            --background: #ffffff;
+            --foreground: #09090b;
+            --card: #f8f8fa;
+            --card-foreground: #09090b;
+            --popover: #ffffff;
+            --popover-foreground: #09090b;
+            --primary: #e6a800;
+            --primary-foreground: #ffffff;
+            --secondary: #f1f5f9;
+            --secondary-foreground: #0f172a;
+            --muted: #f1f5f9;
+            --muted-foreground: #64748b;
+            --accent: #e2e8f0;
+            --accent-foreground: #0f172a;
+            --destructive: #dc2626;
+            --destructive-foreground: #ffffff;
+            --border: #e2e8f0;
+            --input: #e2e8f0;
+            --ring: #e6a800;
+            --radius: 8px;
+            --success: #16a34a;
+            --warning: #d97706;
+            --info: #2563eb;
+        }
+
+        /* ─── Light Mode Overrides ─── */
+        [data-theme="light"] .header {
+            background: linear-gradient(135deg, rgba(245, 197, 24, 0.08), rgba(255, 255, 255, 0.9));
+            border-bottom-color: var(--border);
+        }
+
+        [data-theme="light"] .logo {
+            box-shadow: 0 2px 8px rgba(245, 197, 24, 0.2);
+        }
+
+        [data-theme="light"] .generate-btn {
+            box-shadow: 0 4px 16px rgba(230, 168, 0, 0.25);
+        }
+
+        [data-theme="light"] .generate-btn:hover {
+            box-shadow: 0 6px 24px rgba(230, 168, 0, 0.35);
+        }
+
+        [data-theme="light"] .generate-section {
+            background: linear-gradient(to top, rgba(245, 197, 24, 0.04), transparent);
+        }
+
+        [data-theme="light"] .btn-primary {
+            box-shadow: 0 2px 8px rgba(230, 168, 0, 0.2);
+        }
+
+        [data-theme="light"] .toast {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .toast.success {
+            background: rgba(22, 163, 74, 0.08);
+            border-color: rgba(22, 163, 74, 0.2);
+        }
+
+        [data-theme="light"] .toast.error {
+            background: rgba(220, 38, 38, 0.08);
+            border-color: rgba(220, 38, 38, 0.2);
+        }
+
+        [data-theme="light"] .toast.info {
+            background: rgba(37, 99, 235, 0.08);
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+
+        [data-theme="light"] ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+        }
+
+        [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        [data-theme="light"] .select option {
+            background: var(--background);
+            color: var(--foreground);
+        }
+
+        /* ─── Reset & Base ─── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--background);
+            color: var(--foreground);
+            font-size: 13px;
+            line-height: 1.5;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ─── Scrollbar ─── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--muted-foreground);
+        }
+
+        /* ─── App Container ─── */
+        .app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ─── Header ─── */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(245, 197, 24, 0.05), transparent);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #f5c518, #ff8c00);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 2px 8px rgba(245, 197, 24, 0.3);
+        }
+
+        .header-title {
+            font-size: 15px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f5c518, #ff8c00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.3px;
+        }
+
+        .header-subtitle {
+            font-size: 10px;
+            color: var(--muted-foreground);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-badge {
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 100px;
+            background: rgba(245, 197, 24, 0.15);
+            color: var(--primary);
+            font-weight: 600;
+            border: 1px solid rgba(245, 197, 24, 0.2);
+            letter-spacing: 0.5px;
+        }
+
+        /* ─── Content Area ─── */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* ─── Section Cards ─── */
+        .section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
+
+        .section-header:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .section-header-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .section-icon.ref {
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .section-icon.prompt {
+            background: rgba(168, 85, 247, 0.15);
+        }
+
+        .section-icon.settings {
+            background: rgba(34, 197, 94, 0.15);
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--foreground);
+        }
+
+        .section-chevron {
+            color: var(--muted-foreground);
+            transition: transform 0.2s;
+            font-size: 12px;
+        }
+
+        .section-chevron.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .section-body {
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .section-body.collapsed {
+            display: none;
+        }
+
+        /* ─── Label ─── */
+        .label {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted-foreground);
+            margin-bottom: 4px;
+        }
+
+        .label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .label-hint {
+            font-size: 10px;
+            color: var(--muted-foreground);
+            opacity: 0.7;
+        }
+
+        /* ─── Buttons ─── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--secondary);
+            color: var(--foreground);
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: inherit;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            border-color: var(--muted-foreground);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f5c518, #e6a800);
+            color: var(--primary-foreground);
+            border: none;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(245, 197, 24, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #e6b800, #d4a000);
+            box-shadow: 0 4px 12px rgba(245, 197, 24, 0.35);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-primary:disabled:hover {
+            background: linear-gradient(135deg, #f5c518, #e6a800);
+            box-shadow: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px dashed var(--border);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: var(--muted-foreground);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            border: none;
+            padding: 4px 8px;
+            color: var(--muted-foreground);
+        }
+
+        .btn-ghost:hover {
+            color: var(--foreground);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-danger {
+            color: var(--destructive);
+        }
+
+        .btn-sm {
+            padding: 4px 10px;
+            font-size: 11px;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* ─── Reference Images Area ─── */
+        .ref-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .ref-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--muted);
+        }
+
+        .ref-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .ref-item .remove-btn {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            color: white;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .ref-item:hover .remove-btn {
+            opacity: 1;
+        }
+
+        .ref-add {
+            aspect-ratio: 1;
+            border: 1px dashed var(--border);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            gap: 2px;
+            background: transparent;
+            color: var(--muted-foreground);
+            font-family: inherit;
+        }
+
+        .ref-add:hover {
+            border-color: var(--primary);
+            background: rgba(245, 197, 24, 0.05);
+            color: var(--primary);
+        }
+
+        .ref-add-icon {
+            font-size: 18px;
+        }
+
+        .ref-add-text {
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        /* ─── Selection Card ─── */
+        .selection-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: var(--muted);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .selection-card-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            background: rgba(59, 130, 246, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .selection-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .selection-card-name {
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .selection-card-type {
+            font-size: 10px;
+            color: var(--muted-foreground);
+        }
+
+        .selection-empty {
+            text-align: center;
+            padding: 16px;
+            color: var(--muted-foreground);
+            font-size: 12px;
+        }
+
+        .selection-empty-icon {
+            font-size: 24px;
+            margin-bottom: 6px;
+            opacity: 0.5;
+        }
+
+        /* ─── Tabs ─── */
+        .tabs {
+            display: flex;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            background: var(--muted);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            color: var(--muted-foreground);
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: var(--foreground);
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--foreground);
+        }
+
+        /* ─── Textarea ─── */
+        .textarea-wrapper {
+            position: relative;
+        }
+
+        .textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 10px 12px;
+            padding-bottom: 30px;
+            background: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--foreground);
+            font-size: 12px;
+            font-family: inherit;
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(245, 197, 24, 0.1);
+        }
+
+        .textarea::placeholder {
+            color: var(--muted-foreground);
+            opacity: 0.6;
+        }
+
+        .char-count {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: 10px;
+            color: var(--muted-foreground);
+        }
+
+        .char-count.warn {
+            color: var(--warning);
+        }
+
+        .char-count.danger {
+            color: var(--destructive);
+        }
+
+        /* ─── Select / Input ─── */
+        .select,
+        .input {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--foreground);
+            font-size: 12px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.15s;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 32px;
+        }
+
+        .select:focus,
+        .input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(245, 197, 24, 0.1);
+        }
+
+        .select option {
+            background: var(--background);
+            color: var(--foreground);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+
+
+        /* ─── Generate Button ─── */
+        .generate-section {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            background: linear-gradient(to top, rgba(245, 197, 24, 0.03), transparent);
+            position: sticky;
+            bottom: 0;
+            backdrop-filter: blur(12px);
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #f5c518, #ff8c00);
+            color: var(--primary-foreground);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 16px rgba(245, 197, 24, 0.3);
+            letter-spacing: -0.2px;
+        }
+
+        .generate-btn:hover {
+            box-shadow: 0 6px 24px rgba(245, 197, 24, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(245, 197, 24, 0.2);
+        }
+
+        .generate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ─── Progress / Status ─── */
+        .status-bar {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px;
+            background: var(--muted);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .status-bar.visible {
+            display: flex;
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-icon {
+            font-size: 14px;
+            animation: none;
+        }
+
+        .status-icon.spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status-text {
+            font-size: 12px;
+            color: var(--foreground);
+            font-weight: 500;
+        }
+
+        .status-subtext {
+            font-size: 11px;
+            color: var(--muted-foreground);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f5c518, #ff8c00);
+            border-radius: 2px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        .progress-fill.indeterminate {
+            width: 30%;
+            animation: indeterminate 1.5s ease-in-out infinite;
+        }
+
+        @keyframes indeterminate {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(400%);
+            }
+        }
+
+        /* ─── Result Preview ─── */
+        .result-section {
+            display: none;
+        }
+
+        .result-section.visible {
+            display: block;
+        }
+
+        .result-image-container {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: var(--muted);
+        }
+
+        .result-image {
+            width: 100%;
+            display: block;
+            border-radius: 7px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .result-actions .btn {
+            flex: 1;
+        }
+
+        /* ─── Toast ─── */
+        .toast-container {
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            pointer-events: none;
+        }
+
+        .toast {
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: auto;
+            animation: toastIn 0.3s ease-out;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .toast.success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: var(--success);
+        }
+
+        .toast.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--destructive);
+        }
+
+        .toast.info {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--info);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ─── Divider ─── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--muted-foreground);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* ─── Empty State ─── */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+            opacity: 0.6;
+        }
+
+        .empty-state-text {
+            font-size: 12px;
+            color: var(--muted-foreground);
+            max-width: 200px;
+        }
+
+        /* ─── Tooltip ─── */
+        .tooltip-wrap {
+            position: relative;
+            display: inline-flex;
+        }
+
+        .tooltip-wrap .tooltip {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 4px 8px;
+            background: var(--foreground);
+            color: var(--background);
+            font-size: 10px;
+            border-radius: 4px;
+            white-space: nowrap;
+            margin-bottom: 4px;
+            z-index: 50;
+        }
+
+        .tooltip-wrap:hover .tooltip {
+            display: block;
+        }
+
+        /* hidden file input */
+        .hidden {
+            display: none !important;
+        }
+
+        /* ─── Theme Toggle ─── */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--muted);
+            color: var(--muted-foreground);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(245, 197, 24, 0.08);
+        }
+
+        .header-subtitle a {
+            color: var(--muted-foreground);
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+
+        .header-subtitle a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <!-- Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <div class="logo">🍌</div>
+                <div>
+                    <div class="header-title">Nano Banana Pro</div>
+                    <div class="header-subtitle">by <a href="https://sachindesign.com/"
+                            target="_blank">sachindesign.com</a></div>
+                </div>
+            </div>
+            <div class="header-right">
+                <span class="header-badge">v1.0</span>
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"
+                    title="Toggle Light/Dark Mode">🌙</button>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+
+
+            <!-- Reference Images Section -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('reference')">
+                    <div class="section-header-left">
+                        <div class="section-icon ref">🖼</div>
+                        <span class="section-title">Reference Images</span>
+                    </div>
+                    <span class="section-chevron" id="chevron-reference">▼</span>
+                </div>
+                <div class="section-body" id="body-reference">
+                    <!-- Tabs: Upload / Figma Selection -->
+                    <div class="tabs">
+                        <button class="tab active" id="tab-upload" onclick="switchRefTab('upload')">📤 Upload
+                            Image</button>
+                        <button class="tab" id="tab-figma" onclick="switchRefTab('figma')">🎨 From Figma</button>
+                    </div>
+
+                    <!-- Upload Tab Content -->
+                    <div id="tab-content-upload">
+                        <div class="ref-grid" id="refGrid">
+                            <button class="ref-add" onclick="document.getElementById('fileInput').click()">
+                                <span class="ref-add-icon">+</span>
+                                <span class="ref-add-text">Add Image</span>
+                            </button>
+                        </div>
+                        <input type="file" id="fileInput" class="hidden" accept="image/jpeg,image/png,image/webp"
+                            multiple />
+                        <div style="font-size:10px;color:var(--muted-foreground);margin-top:4px;">
+                            Supports JPG, PNG, WebP · Max 30MB · Up to 8 images
+                        </div>
+                    </div>
+
+                    <!-- Figma Selection Tab Content -->
+                    <div id="tab-content-figma" class="hidden">
+                        <div id="selectionArea">
+                            <div class="selection-empty" id="noSelection">
+                                <div class="selection-empty-icon">🔍</div>
+                                <div>Select an element on the canvas to use as reference</div>
+                            </div>
+                            <div class="selection-card hidden" id="selectionCard">
+                                <div class="selection-card-icon">🎯</div>
+                                <div class="selection-card-info">
+                                    <div class="selection-card-name" id="selectionName">-</div>
+                                    <div class="selection-card-type" id="selectionType">-</div>
+                                </div>
+                                <button class="btn btn-sm" onclick="exportSelection()">📸 Capture</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prompt Section -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('prompt')">
+                    <div class="section-header-left">
+                        <div class="section-icon prompt">✨</div>
+                        <span class="section-title">Prompt</span>
+                    </div>
+                    <span class="section-chevron" id="chevron-prompt">▼</span>
+                </div>
+                <div class="section-body" id="body-prompt">
+                    <div class="form-group">
+                        <div class="label-row">
+                            <span class="label">Describe your image</span>
+                            <span class="label-hint" id="charCount">0 / 20,000</span>
+                        </div>
+                        <div class="textarea-wrapper">
+                            <textarea class="textarea" id="promptInput"
+                                placeholder="Describe the image you want to generate...&#10;&#10;Example: A futuristic cityscape at sunset with flying cars and neon lights, in a cyberpunk style"
+                                oninput="updateCharCount()"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection('settings')">
+                    <div class="section-header-left">
+                        <div class="section-icon settings">⚙️</div>
+                        <span class="section-title">Settings</span>
+                    </div>
+                    <span class="section-chevron" id="chevron-settings">▼</span>
+                </div>
+                <div class="section-body" id="body-settings">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <span class="label">Aspect Ratio</span>
+                            <select class="select" id="aspectRatio">
+                                <option value="1:1" selected>1:1 — Square</option>
+                                <option value="2:3">2:3 — Portrait</option>
+                                <option value="3:2">3:2 — Landscape</option>
+                                <option value="3:4">3:4 — Portrait</option>
+                                <option value="4:3">4:3 — Landscape</option>
+                                <option value="4:5">4:5 — Portrait</option>
+                                <option value="5:4">5:4 — Landscape</option>
+                                <option value="9:16">9:16 — Mobile</option>
+                                <option value="16:9">16:9 — Widescreen</option>
+                                <option value="21:9">21:9 — Ultra Wide</option>
+                                <option value="auto">Auto</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <span class="label">Resolution</span>
+                            <select class="select" id="resolution">
+                                <option value="1K" selected>1K</option>
+                                <option value="2K">2K</option>
+                                <option value="4K">4K</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <span class="label">Output Format</span>
+                        <select class="select" id="outputFormat">
+                            <option value="png" selected>PNG — Lossless</option>
+                            <option value="jpg">JPG — Compressed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="status-bar" id="statusBar">
+                <div class="status-row">
+                    <span class="status-icon" id="statusIcon">⏳</span>
+                    <div>
+                        <div class="status-text" id="statusText">Initializing...</div>
+                        <div class="status-subtext" id="statusSubtext"></div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- Result Preview -->
+            <div class="result-section" id="resultSection">
+                <div class="section">
+                    <div class="section-header">
+                        <div class="section-header-left">
+                            <div class="section-icon" style="background:rgba(245,197,24,0.15);">🎉</div>
+                            <span class="section-title">Generated Image</span>
+                        </div>
+                    </div>
+                    <div class="section-body">
+                        <div class="result-image-container">
+                            <img class="result-image" id="resultImage" src="" alt="Generated Image" />
+                        </div>
+                        <div class="result-actions">
+                            <button class="btn btn-primary" onclick="placeOnCanvas()">📌 Place on Canvas</button>
+                            <button class="btn" onclick="openInBrowser()">🔗 Open URL</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Generate Button (sticky footer) -->
+        <div class="generate-section">
+            <button class="generate-btn" id="generateBtn" onclick="generateImage()">
+                <span>🍌</span>
+                <span>Generate Image</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ─── State ───
+        const state = {
+            referenceImages: [],       // { file: File, dataUrl: string }
+            figmaRefs: [],             // { dataUrl: string, name: string }
+            generatedImageUrl: null,
+            isGenerating: false,
+            selection: null
+        };
+
+        const MAX_REFERENCE_IMAGES = 8;
+        const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+
+        // ─── Theme Toggle ───
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('nano_banana_theme', next);
+            document.getElementById('themeToggle').textContent = next === 'dark' ? '🌙' : '☀️';
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('nano_banana_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+            document.getElementById('themeToggle').textContent = saved === 'dark' ? '🌙' : '☀️';
+        }
+
+        // ─── Init ───
+        window.onload = () => {
+            // Restore theme
+            initTheme();
+            // Request selection info from Figma
+            parent.postMessage({ pluginMessage: { type: 'get-selection-info' } }, '*');
+        };
+
+        // ─── Messages from Plugin Backend ───
+        window.onmessage = (event) => {
+            const msg = event.data.pluginMessage;
+            if (!msg) return;
+
+            switch (msg.type) {
+                case 'selection-info':
+                    handleSelectionInfo(msg);
+                    break;
+                case 'selection-exported':
+                    handleSelectionExported(msg);
+                    break;
+                case 'selection-error':
+                    showToast(msg.message, 'error');
+                    break;
+                case 'image-placed':
+                    if (msg.success) {
+                        showToast('Image placed on canvas!', 'success');
+                    } else {
+                        showToast('Failed to place image: ' + msg.error, 'error');
+                    }
+                    break;
+                case 'generation-status':
+                    handleGenerationStatus(msg);
+                    break;
+                case 'generation-complete':
+                    handleGenerationComplete(msg);
+                    break;
+                case 'generation-error':
+                    handleGenerationError(msg);
+                    break;
+            }
+        };
+
+        // ─── Selection Handling ───
+        function handleSelectionInfo(msg) {
+            state.selection = msg.hasSelection ? msg : null;
+            const noSel = document.getElementById('noSelection');
+            const card = document.getElementById('selectionCard');
+
+            if (msg.hasSelection) {
+                noSel.classList.add('hidden');
+                card.classList.remove('hidden');
+                document.getElementById('selectionName').textContent = msg.name;
+                document.getElementById('selectionType').textContent = msg.nodeType;
+            } else {
+                noSel.classList.remove('hidden');
+                card.classList.add('hidden');
+            }
+        }
+
+        function exportSelection() {
+            parent.postMessage({ pluginMessage: { type: 'export-selection' } }, '*');
+            showToast('Capturing element...', 'info');
+        }
+
+        function handleSelectionExported(msg) {
+            if (state.figmaRefs.length + state.referenceImages.length >= MAX_REFERENCE_IMAGES) {
+                showToast('Maximum 8 reference images allowed', 'error');
+                return;
+            }
+
+            // Convert binary string to base64
+            const base64 = btoa(msg.data);
+            const dataUrl = 'data:image/png;base64,' + base64;
+
+            state.figmaRefs.push({ dataUrl, name: msg.name });
+            renderRefGrid();
+            showToast('Element captured as reference!', 'success');
+        }
+
+        // ─── File Upload ───
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+
+            for (const file of files) {
+                if (state.referenceImages.length + state.figmaRefs.length >= MAX_REFERENCE_IMAGES) {
+                    showToast('Maximum 8 reference images allowed', 'error');
+                    break;
+                }
+
+                if (file.size > MAX_FILE_SIZE) {
+                    showToast(`${file.name} exceeds 30MB limit`, 'error');
+                    continue;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    state.referenceImages.push({
+                        file,
+                        dataUrl: ev.target.result,
+                        uploadedUrl: null
+                    });
+                    renderRefGrid();
+                };
+                reader.readAsDataURL(file);
+            }
+
+            e.target.value = '';
+        });
+
+        // ─── Render Reference Grid ───
+        function renderRefGrid() {
+            const grid = document.getElementById('refGrid');
+            grid.innerHTML = '';
+
+            // Render uploaded images
+            state.referenceImages.forEach((ref, i) => {
+                const item = document.createElement('div');
+                item.className = 'ref-item';
+                item.innerHTML = `
+          <img src="${ref.dataUrl}" alt="Reference ${i + 1}" />
+          <button class="remove-btn" onclick="removeRef('upload', ${i})">✕</button>
+        `;
+                grid.appendChild(item);
+            });
+
+            // Render Figma captures
+            state.figmaRefs.forEach((ref, i) => {
+                const item = document.createElement('div');
+                item.className = 'ref-item';
+                item.innerHTML = `
+          <img src="${ref.dataUrl}" alt="${ref.name}" />
+          <button class="remove-btn" onclick="removeRef('figma', ${i})">✕</button>
+        `;
+                grid.appendChild(item);
+            });
+
+            // Add button
+            const total = state.referenceImages.length + state.figmaRefs.length;
+            if (total < MAX_REFERENCE_IMAGES) {
+                const addBtn = document.createElement('button');
+                addBtn.className = 'ref-add';
+                addBtn.onclick = () => document.getElementById('fileInput').click();
+                addBtn.innerHTML = `
+          <span class="ref-add-icon">+</span>
+          <span class="ref-add-text">Add (${total}/8)</span>
+        `;
+                grid.appendChild(addBtn);
+            }
+        }
+
+        function removeRef(type, index) {
+            if (type === 'upload') {
+                state.referenceImages.splice(index, 1);
+            } else {
+                state.figmaRefs.splice(index, 1);
+            }
+            renderRefGrid();
+        }
+
+        // ─── Tabs ───
+        function switchRefTab(tab) {
+            document.getElementById('tab-upload').classList.toggle('active', tab === 'upload');
+            document.getElementById('tab-figma').classList.toggle('active', tab === 'figma');
+            document.getElementById('tab-content-upload').classList.toggle('hidden', tab !== 'upload');
+            document.getElementById('tab-content-figma').classList.toggle('hidden', tab !== 'figma');
+        }
+
+        // ─── Sections Toggle ───
+        function toggleSection(id) {
+            const body = document.getElementById('body-' + id);
+            const chevron = document.getElementById('chevron-' + id);
+            body.classList.toggle('collapsed');
+            chevron.classList.toggle('collapsed');
+        }
+
+        // ─── Character Count ───
+        function updateCharCount() {
+            const textarea = document.getElementById('promptInput');
+            const count = textarea.value.length;
+            const el = document.getElementById('charCount');
+            el.textContent = `${count.toLocaleString()} / 20,000`;
+
+            if (count > 18000) el.className = 'label-hint danger';
+            else if (count > 15000) el.className = 'label-hint warn';
+            else el.className = 'label-hint';
+        }
+
+
+
+        // ─── Toast ───
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+            toast.innerHTML = `<span>${icons[type] || 'ℹ️'}</span><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                toast.style.transition = 'all 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // ─── Status Bar ───
+        function showStatus(icon, text, subtext, spinning = false, progress = null) {
+            const bar = document.getElementById('statusBar');
+            bar.classList.add('visible');
+
+            const iconEl = document.getElementById('statusIcon');
+            iconEl.textContent = icon;
+            iconEl.className = spinning ? 'status-icon spinning' : 'status-icon';
+
+            document.getElementById('statusText').textContent = text;
+            document.getElementById('statusSubtext').textContent = subtext || '';
+
+            const fill = document.getElementById('progressFill');
+            if (progress === 'indeterminate') {
+                fill.className = 'progress-fill indeterminate';
+                fill.style.width = '30%';
+            } else if (progress !== null) {
+                fill.className = 'progress-fill';
+                fill.style.width = progress + '%';
+            }
+        }
+
+        function hideStatus() {
+            document.getElementById('statusBar').classList.remove('visible');
+        }
+
+        // ─── API Base URL ───
+        // When served from Vercel: relative URLs (same origin)
+        // When loaded locally in Figma: set your Vercel deployment URL here
+        const VERCEL_URL = window.location.origin && !window.location.origin.includes('figma')
+            ? '' // relative — same origin on Vercel
+            : ''; // ← PASTE YOUR VERCEL URL HERE after deployment, e.g. 'https://nano-banana.vercel.app'
+
+        const POLL_INTERVAL = 3000;
+        const MAX_POLL_ATTEMPTS = 120;
+
+        // ─── Upload image via Vercel API (server-side, no CORS issues) ───
+        async function uploadImageToHost(dataUrl) {
+            const res = await fetch(`${VERCEL_URL}/api/upload`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: dataUrl })
+            });
+
+            const data = await res.json();
+            if (!res.ok || data.error) throw new Error(data.error || `Upload failed (${res.status})`);
+            return data.url;
+        }
+
+        // ─── GENERATE IMAGE (via Vercel API) ───
+        async function generateImage() {
+            const prompt = document.getElementById('promptInput').value.trim();
+            if (!prompt) {
+                showToast('Please enter a prompt', 'error');
+                return;
+            }
+
+            if (prompt.length > 20000) {
+                showToast('Prompt exceeds 20,000 character limit', 'error');
+                return;
+            }
+
+            // Disable button
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="status-icon spinning">⏳</span><span>Generating...</span>';
+            state.isGenerating = true;
+
+            // Hide previous result
+            document.getElementById('resultSection').classList.remove('visible');
+
+            try {
+                // Step 1: Upload reference images via Vercel API
+                const allDataUrls = [];
+                for (const ref of state.referenceImages) allDataUrls.push(ref.dataUrl);
+                for (const ref of state.figmaRefs) allDataUrls.push(ref.dataUrl);
+
+                let uploadedUrls = [];
+
+                if (allDataUrls.length > 0) {
+                    showStatus('📤', 'Uploading reference images...', `0 of ${allDataUrls.length}`, true, 'indeterminate');
+
+                    for (let i = 0; i < allDataUrls.length; i++) {
+                        showStatus('📤', `Uploading image ${i + 1} of ${allDataUrls.length}...`, '', true, 'indeterminate');
+                        const url = await uploadImageToHost(allDataUrls[i]);
+                        uploadedUrls.push(url);
+                    }
+
+                    showStatus('✅', 'Images uploaded!', `${uploadedUrls.length} ready`, false, null);
+                }
+
+                // Step 2: Create generation task via Vercel API
+                const aspectRatio = document.getElementById('aspectRatio').value;
+                const resolution = document.getElementById('resolution').value;
+                const outputFormat = document.getElementById('outputFormat').value;
+
+                showStatus('🚀', 'Creating generation task...', 'Sending to Kie AI', true, 'indeterminate');
+
+                const createRes = await fetch(`${VERCEL_URL}/api/generate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt,
+                        imageInput: uploadedUrls,
+                        aspectRatio,
+                        resolution,
+                        outputFormat
+                    })
+                });
+
+                const createData = await createRes.json();
+
+                if (createData.code !== 200) {
+                    throw new Error(createData.msg || `API Error: ${createData.code}`);
+                }
+
+                const taskId = createData.data.taskId;
+                showStatus('⏳', 'Task created! Generating...', `Task: ${taskId.substring(0, 12)}...`, true, 'indeterminate');
+
+                // Step 3: Poll for results via Vercel API
+                await pollTaskStatus(taskId);
+
+            } catch (error) {
+                showStatus('❌', 'Error', error.message, false, 0);
+                showToast('Error: ' + error.message, 'error');
+                resetGenerateBtn();
+            }
+        }
+
+        // ─── Poll Task Status (via Vercel API) ───
+        async function pollTaskStatus(taskId) {
+            let attempts = 0;
+
+            const poll = async () => {
+                attempts++;
+                if (attempts > MAX_POLL_ATTEMPTS) {
+                    showStatus('❌', 'Timed out', 'Task took too long', false, 0);
+                    showToast('Task timed out after 6 minutes', 'error');
+                    resetGenerateBtn();
+                    return;
+                }
+
+                const elapsed = attempts * (POLL_INTERVAL / 1000);
+
+                try {
+                    const res = await fetch(`${VERCEL_URL}/api/status?taskId=${taskId}`);
+                    const data = await res.json();
+
+                    if (data.code !== 200) {
+                        showStatus('⚠️', 'Query error', data.msg || '', true, 'indeterminate');
+                        setTimeout(poll, POLL_INTERVAL);
+                        return;
+                    }
+
+                    const taskState = data.data.state;
+
+                    if (taskState === 'success') {
+                        const resultJson = JSON.parse(data.data.resultJson);
+                        const resultUrls = resultJson.resultUrls || [];
+
+                        if (resultUrls.length === 0) {
+                            showStatus('❌', 'No image generated', '', false, 0);
+                            showToast('No image was generated', 'error');
+                            resetGenerateBtn();
+                            return;
+                        }
+
+                        const imageUrl = resultUrls[0];
+                        state.generatedImageUrl = imageUrl;
+
+                        const costTime = data.data.costTime
+                            ? `${(data.data.costTime / 1000).toFixed(1)}s`
+                            : `${elapsed.toFixed(0)}s`;
+
+                        showStatus('✅', 'Generation complete!', `Completed in ${costTime}`, false, 100);
+                        document.getElementById('resultImage').src = imageUrl;
+                        document.getElementById('resultSection').classList.add('visible');
+                        showToast('Image generated successfully! 🎉', 'success');
+                        resetGenerateBtn();
+
+                    } else if (taskState === 'fail') {
+                        const failMsg = data.data.failMsg || 'Task failed';
+                        showStatus('❌', 'Generation failed', failMsg, false, 0);
+                        showToast('Error: ' + failMsg, 'error');
+                        resetGenerateBtn();
+
+                    } else {
+                        showStatus('⏳', 'Generating image...', `Elapsed: ${elapsed.toFixed(0)}s`, true, 'indeterminate');
+                        setTimeout(poll, POLL_INTERVAL);
+                    }
+
+                } catch (err) {
+                    showStatus('🔄', 'Connection error, retrying...', err.message, true, 'indeterminate');
+                    setTimeout(poll, POLL_INTERVAL);
+                }
+            };
+
+            setTimeout(poll, POLL_INTERVAL);
+        }
+
+        // ─── Handle messages from Figma sandbox (only for canvas operations) ───
+        function handleGenerationStatus(msg) {
+            const elapsed = msg.elapsed ? `Elapsed: ${msg.elapsed.toFixed(0)}s` : '';
+            showStatus('⏳', msg.message || 'Generating...', elapsed, true, 'indeterminate');
+        }
+
+        function handleGenerationComplete(msg) {
+            state.generatedImageUrl = msg.imageUrl;
+            showStatus('✅', 'Generation complete!', `Completed in ${msg.costTime}`, false, 100);
+            document.getElementById('resultImage').src = msg.imageUrl;
+            document.getElementById('resultSection').classList.add('visible');
+            showToast('Image generated successfully! 🎉', 'success');
+            resetGenerateBtn();
+        }
+
+        function handleGenerationError(msg) {
+            showStatus('❌', 'Generation failed', msg.message, false, 0);
+            showToast('Error: ' + msg.message, 'error');
+            resetGenerateBtn();
+        }
+
+        function resetGenerateBtn() {
+            state.isGenerating = false;
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = false;
+            btn.innerHTML = '<span>🍌</span><span>Generate Image</span>';
+        }
+
+        // ─── Place on Canvas ───
+        function placeOnCanvas() {
+            if (!state.generatedImageUrl) {
+                showToast('No image to place', 'error');
+                return;
+            }
+
+            // Calculate dimensions from aspect ratio
+            const ratio = document.getElementById('aspectRatio').value;
+            const resolution = document.getElementById('resolution').value;
+            let width = 1024, height = 1024;
+
+            const baseSize = resolution === '4K' ? 2048 : resolution === '2K' ? 1536 : 1024;
+
+            if (ratio !== 'auto') {
+                const [w, h] = ratio.split(':').map(Number);
+                if (w > h) {
+                    width = baseSize;
+                    height = Math.round(baseSize * h / w);
+                } else {
+                    height = baseSize;
+                    width = Math.round(baseSize * w / h);
+                }
+            } else {
+                width = baseSize;
+                height = baseSize;
+            }
+
+            parent.postMessage({
+                pluginMessage: {
+                    type: 'place-image',
+                    imageUrl: state.generatedImageUrl,
+                    width: width,
+                    height: height
+                }
+            }, '*');
+
+            showToast('Placing image on canvas...', 'info');
+        }
+
+        // ─── Open in Browser ───
+        function openInBrowser() {
+            if (state.generatedImageUrl) {
+                window.open(state.generatedImageUrl, '_blank');
+            }
+        }
+    </script>
+</body>
+
+</html>
