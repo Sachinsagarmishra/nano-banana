@@ -1615,6 +1615,22 @@
                 const credits = state.user.credits !== undefined ? state.user.credits : '?';
                 pill.innerHTML = `<i class="fa-regular fa-star"></i> ${credits} credits`;
                 pill.title = `${credits} credits remaining`;
+                pill.style.cursor = 'pointer';
+                pill.onclick = () => buyCredits();
+
+                // Add a small "+" buy button next to credits if it doesn't exist
+                let buyBtn = document.getElementById('headerBuyBtn');
+                if (!buyBtn) {
+                    buyBtn = document.createElement('button');
+                    buyBtn.id = 'headerBuyBtn';
+                    buyBtn.className = 'btn btn-sm btn-primary';
+                    buyBtn.style.marginLeft = '8px';
+                    buyBtn.style.padding = '4px 8px';
+                    buyBtn.style.fontSize = '12px';
+                    buyBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Buy';
+                    buyBtn.onclick = () => buyCredits();
+                    badgeArea.insertBefore(buyBtn, userCircle);
+                }
 
                 // Update Initial
                 const name = state.user.full_name || state.user.email || 'User';
@@ -1641,6 +1657,10 @@
                     loginBtn.onclick = () => showSignupWall();
                     badgeArea.insertBefore(loginBtn, userCircle);
                 }
+
+                // Remove buy button if guest
+                const buyBtn = document.getElementById('headerBuyBtn');
+                if (buyBtn) buyBtn.remove();
             }
             badgeArea.insertBefore(pill, badgeArea.firstChild);
         }
@@ -1665,6 +1685,36 @@
             state.user = null;
             document.getElementById('authOverlay').classList.remove('hidden');
             updateCreditsDisplay();
+        }
+
+        async function buyCredits() {
+            if (!state.user) {
+                showSignupWall();
+                return;
+            }
+
+            showToast('Initiating secure checkout...', 'info');
+
+            try {
+                const res = await fetch(`${VERCEL_URL}/api/payments/create-checkout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${state.authToken}`
+                    }
+                });
+
+                const data = await res.json();
+                if (data.url) {
+                    // Open the checkout URL in the user's default browser
+                    window.open(data.url, '_blank');
+                } else {
+                    throw new Error(data.error || 'Failed to initialize checkout');
+                }
+            } catch (err) {
+                console.error('Checkout error:', err);
+                showToast(err.message || 'Checkout failed', 'error');
+            }
         }
 
         // ─── Init ───

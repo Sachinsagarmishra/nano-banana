@@ -21,6 +21,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.97.0"
+    "@supabase/supabase-js": "^2.97.0",
+    "dodopayments": "^2.20.0"
   }
 }
