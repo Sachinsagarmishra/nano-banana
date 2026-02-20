@@ -1089,6 +1089,301 @@
             display: none;
         }
 
+        /* ─── Premium Plans Popup ─── */
+        .plans-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .plans-overlay.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .plans-popup {
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            background: #111113;
+            border: 1px solid rgba(245, 197, 24, 0.15);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(245, 197, 24, 0.05);
+        }
+
+        .plans-header {
+            padding: 24px 24px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .plans-header h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            margin: 0;
+            letter-spacing: -0.3px;
+        }
+
+        .plans-balance {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--muted-foreground);
+        }
+
+        .plans-balance .balance-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(245, 197, 24, 0.15);
+            color: #f5c518;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .plans-close {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #888;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .plans-close:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .plans-list {
+            padding: 0 24px 8px;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .plan-card {
+            border: 1px solid rgba(245, 197, 24, 0.2);
+            border-radius: 14px;
+            padding: 18px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+
+        .plan-card:hover {
+            border-color: rgba(245, 197, 24, 0.5);
+            background: rgba(245, 197, 24, 0.05);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(245, 197, 24, 0.08);
+        }
+
+        .plan-card-left {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .plan-card-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: -0.2px;
+        }
+
+        .plan-card-credits {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(245, 197, 24, 0.12);
+            color: #f5c518;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .plan-card-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-shrink: 0;
+        }
+
+        .plan-card-price {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.5px;
+        }
+
+        .plan-select-btn {
+            padding: 8px 18px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            color: #ccc;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .plan-select-btn:hover {
+            border-color: #f5c518;
+            color: #f5c518;
+            background: rgba(245, 197, 24, 0.1);
+        }
+
+        .plans-footer {
+            padding: 16px 24px 20px;
+            text-align: center;
+            font-size: 11px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .plans-footer a {
+            color: #f5c518;
+            text-decoration: none;
+        }
+
+        .plans-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .plans-loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted-foreground);
+        }
+
+        .plans-loading .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(245, 197, 24, 0.2);
+            border-top-color: #f5c518;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        [data-theme="light"] .plans-popup {
+            background: #fff;
+            border-color: rgba(230, 168, 0, 0.2);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="light"] .plans-header h2 {
+            color: #111;
+        }
+
+        [data-theme="light"] .plan-card {
+            background: #fafafa;
+            border-color: rgba(230, 168, 0, 0.25);
+        }
+
+        [data-theme="light"] .plan-card:hover {
+            background: rgba(230, 168, 0, 0.06);
+            border-color: rgba(230, 168, 0, 0.5);
+        }
+
+        [data-theme="light"] .plan-card-name {
+            color: #111;
+        }
+
+        [data-theme="light"] .plan-card-price {
+            color: #111;
+        }
+
+        [data-theme="light"] .plan-select-btn {
+            border-color: #ccc;
+            color: #555;
+            background: #f5f5f5;
+        }
+
+        [data-theme="light"] .plan-select-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(230, 168, 0, 0.08);
+        }
+
+        [data-theme="light"] .plans-close {
+            background: #f0f0f0;
+            color: #999;
+        }
+
+        [data-theme="light"] .plans-close:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        [data-theme="light"] .plans-footer {
+            color: #999;
+        }
+
         .auth-logo {
             font-size: 48px;
             margin-bottom: 12px;
@@ -1308,15 +1603,30 @@
     </div>
 
     <!-- Plans Overlay -->
-    <div class="overlay hidden" id="plansOverlay" style="background: var(--bg); z-index: 1000; padding: 24px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-            <h2 style="font-size: 18px; font-weight: 700;">Select a Plan</h2>
-            <button class="btn btn-sm" onclick="document.getElementById('plansOverlay').classList.add('hidden')"><i
-                    class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div id="plansList"
-            style="display: flex; flex-direction: column; gap: 12px; overflow-y: auto; max-height: calc(100vh - 100px); padding-bottom: 24px;">
-            <div style="text-align:center; padding: 20px; color: var(--muted-foreground);">Loading plans...</div>
+    <div class="plans-overlay hidden" id="plansOverlay">
+        <div class="plans-popup">
+            <div class="plans-header">
+                <div>
+                    <h2>Top Up Credits</h2>
+                    <div class="plans-balance">
+                        Balance: <span class="balance-badge" id="planBalanceBadge">⚡ 0</span>
+                    </div>
+                </div>
+                <button class="plans-close" onclick="document.getElementById('plansOverlay').classList.add('hidden')"
+                    title="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="plans-list" id="plansList">
+                <div class="plans-loading">
+                    <div class="spinner"></div>
+                    Loading plans...
+                </div>
+            </div>
+            <div class="plans-footer">
+                Secure payment via Dodo Payments. Credits do not expire.<br>
+                For compliance, write to <a href="mailto:tatosdeveloper@gmail.com">tatosdeveloper@gmail.com</a>
+            </div>
         </div>
     </div>
 
@@ -1774,8 +2084,13 @@
                 showSignupWall();
                 return;
             }
+
+            // Update balance badge in popup
+            const credits = state.user.credits !== undefined ? state.user.credits : '?';
+            document.getElementById('planBalanceBadge').textContent = `⚡ ${credits}`;
+
             document.getElementById('plansOverlay').classList.remove('hidden');
-            document.getElementById('plansList').innerHTML = '<div style="text-align:center; padding: 20px; color: var(--muted-foreground);">Loading plans...</div>';
+            document.getElementById('plansList').innerHTML = '<div class="plans-loading"><div class="spinner"></div>Loading plans...</div>';
 
             try {
                 const res = await fetch(`${VERCEL_URL}/api/subscriptions`);
@@ -1786,23 +2101,25 @@
                 }
 
                 if (data.plans.length === 0) {
-                    document.getElementById('plansList').innerHTML = '<div style="text-align:center; padding: 20px; color: var(--muted-foreground);">No plans currently available.</div>';
+                    document.getElementById('plansList').innerHTML = '<div class="plans-loading">No plans currently available.</div>';
                     return;
                 }
 
                 document.getElementById('plansList').innerHTML = data.plans.map(p => `
-                    <div style="border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: var(--bg-card); display: flex; flex-direction: column; gap: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div style="font-weight: 600; font-size: 15px;">${p.name}</div>
-                            <div style="font-weight: 700; font-size: 15px; color: var(--accent);">${p.price_string || ''}</div>
+                    <div class="plan-card" onclick="checkoutPlan('${p.id}')">
+                        <div class="plan-card-left">
+                            <div class="plan-card-name">${p.name}</div>
+                            <div class="plan-card-credits">⚡ ${p.credits} Credits</div>
                         </div>
-                        <div style="font-size: 13px; color: var(--muted-foreground);"><i class="fa-solid fa-star" style="color:var(--accent); font-size:10px; margin-right:4px;"></i>${p.credits} credits per month</div>
-                        <button class="btn btn-primary" style="margin-top: 8px; width: 100%; padding: 10px;" onclick="checkoutPlan('${p.id}')">Subscribe</button>
+                        <div class="plan-card-right">
+                            <div class="plan-card-price">${p.price_string || ''}</div>
+                            <button class="plan-select-btn" onclick="event.stopPropagation(); checkoutPlan('${p.id}')">Select</button>
+                        </div>
                     </div>
                 `).join('');
 
             } catch (err) {
-                document.getElementById('plansList').innerHTML = `<div style="text-align:center; padding: 20px; color: var(--destructive);">${err.message}</div>`;
+                document.getElementById('plansList').innerHTML = `<div class="plans-loading" style="color: var(--destructive);">${err.message}</div>`;
             }
         }
 
