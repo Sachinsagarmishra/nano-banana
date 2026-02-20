@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nano Banana Pro</title>
+    <title>Nano Banana Pro v2</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -1181,7 +1181,27 @@
 
         .user-circle:hover {
             border-color: var(--primary);
-            background: rgba(245, 197, 24, 0.1);
+            background: rgba(245, 197, 24, 0.2);
+            box-shadow: 0 0 10px rgba(245, 197, 24, 0.2);
+        }
+
+        .login-btn-header {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 100px;
+            background: var(--primary);
+            color: black !important;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .login-btn-header:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
         }
 
         .user-circle img {
@@ -1296,7 +1316,7 @@
             <div class="header-left">
                 <div class="logo">🍌</div>
                 <div>
-                    <div class="header-title">Nano Banana Pro</div>
+                    <div class="header-title">Nano Banana Pro v2</div>
                     <div class="header-subtitle">by <a href="https://sachindesign.com/"
                             target="_blank">sachindesign.com</a></div>
                 </div>
@@ -1450,7 +1470,7 @@
                 <div class="status-row">
                     <span class="status-icon" id="statusIcon">⏳</span>
                     <div>
-                        <div class="status-text" id="statusText">Initializing...</div>
+                        <div class="status-text" id="statusText">Initializing v2...</div>
                         <div class="status-subtext" id="statusSubtext"></div>
                     </div>
                 </div>
@@ -1599,14 +1619,28 @@
                 // Update Initial
                 const name = state.user.full_name || state.user.email || 'User';
                 userInitial.textContent = name[0].toUpperCase();
+                userCircle.style.display = 'flex';
+                // Remove login button if exists
+                const existingLogin = document.getElementById('headerLoginBtn');
+                if (existingLogin) existingLogin.remove();
+
                 userCircle.title = `Logged in as ${name} (Click to Logout)`;
             } else {
                 const freeLeft = Math.max(0, FREE_GENERATIONS - state.freeUsed);
                 pill.innerHTML = `<i class="fa-regular fa-gift"></i> ${freeLeft} free`;
                 pill.title = `${freeLeft} free generation(s) remaining`;
 
-                userInitial.textContent = '?';
-                userCircle.title = 'Guest User';
+                // Show Login Button instead of circle
+                userCircle.style.display = 'none';
+                let loginBtn = document.getElementById('headerLoginBtn');
+                if (!loginBtn) {
+                    loginBtn = document.createElement('button');
+                    loginBtn.id = 'headerLoginBtn';
+                    loginBtn.className = 'login-btn-header';
+                    loginBtn.textContent = 'Login';
+                    loginBtn.onclick = () => showSignupWall();
+                    badgeArea.insertBefore(loginBtn, userCircle);
+                }
             }
             badgeArea.insertBefore(pill, badgeArea.firstChild);
         }
@@ -1622,6 +1656,10 @@
         }
 
         function pluginLogout() {
+            if (!state.user) {
+                showSignupWall();
+                return;
+            }
             localStorage.removeItem('nb_token');
             state.authToken = null;
             state.user = null;
@@ -1767,19 +1805,19 @@
                 dataUrl: ref.dataUrl,
                 source: ref.source,
                 name: ref.name,
-                status: 'uploading',
+                status: 'pending',
                 progress: 0,
                 uploadedUrl: null
             };
 
             state.referenceImages.push(newRef);
             renderRefGrid();
-
-            // Start Upload
-            uploadRef(newRef);
+            // Removed automatic upload as per user request
         }
 
         async function uploadRef(ref) {
+            ref.status = 'uploading';
+            renderRefGrid();
             try {
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', `${VERCEL_URL}/api/upload`, true);
@@ -1851,6 +1889,13 @@
                     overlay = `
                         <div class="ref-overlay" style="background: rgba(239, 68, 68, 0.7)">
                             <div class="ref-upload-text">ERROR</div>
+                            <button class="btn btn-xs" style="margin-top:4px;font-size:8px;padding:2px 6px;" onclick="uploadRef(state.referenceImages[${i}])">Retry</button>
+                        </div>
+                    `;
+                } else if (ref.status === 'pending') {
+                    overlay = `
+                        <div class="ref-overlay" style="background: rgba(0,0,0,0.4)">
+                            <button class="btn btn-xs" style="font-size:9px;padding:3px 8px;background:var(--primary);color:black;border:none;" onclick="uploadRef(state.referenceImages[${i}])">Upload</button>
                         </div>
                     `;
                 }
@@ -1874,6 +1919,27 @@
                     <span class="ref-add-text">Add (${state.referenceImages.length}/8)</span>
                 `;
                 grid.appendChild(addBtn);
+            }
+
+            // Global Upload Button for all pending
+            const pending = state.referenceImages.filter(r => r.status === 'pending');
+            if (pending.length > 0) {
+                const uploadAllBtn = document.createElement('div');
+                uploadAllBtn.style.gridColumn = '1 / -1';
+                uploadAllBtn.style.marginTop = '8px';
+                uploadAllBtn.innerHTML = `
+                    <button class="btn btn-primary" style="width:100%;font-size:11px;padding:8px;" onclick="uploadAllPending()">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload ${pending.length} Image${pending.length > 1 ? 's' : ''}
+                    </button>
+                `;
+                grid.appendChild(uploadAllBtn);
+            }
+        }
+
+        async function uploadAllPending() {
+            const pending = state.referenceImages.filter(r => r.status === 'pending');
+            for (const ref of pending) {
+                uploadRef(ref);
             }
         }
 
@@ -2021,7 +2087,10 @@
             // Hide previous result
             document.getElementById('resultSection').classList.remove('visible');
 
+            showStatus('⏳', 'Checking inputs...', '', true, 'indeterminate');
+
             try {
+                console.log('Starting generation...', { promptLength: prompt.length, refImages: state.referenceImages.length });
                 // Check if all images are uploaded
                 const uploadingCount = state.referenceImages.filter(r => r.status === 'uploading').length;
                 if (uploadingCount > 0) {
@@ -2039,6 +2108,12 @@
                 const resolution = document.getElementById('resolution').value;
                 const outputFormat = document.getElementById('outputFormat').value;
 
+                console.log('API Request:', {
+                    url: `${VERCEL_URL}/api/generate`,
+                    headers: { 'Authorization': state.authToken ? 'Present' : 'None' },
+                    payload: { prompt, imageInputCount: uploadedUrls.length }
+                });
+
                 showStatus('<i class="fa-regular fa-paper-plane"></i>', 'Creating generation task...', 'Sending to Kie AI', true, 'indeterminate');
 
                 const createRes = await fetch(`${VERCEL_URL}/api/generate`, {
@@ -2055,10 +2130,13 @@
                         outputFormat
                     })
                 });
-                const createData = await createRes.json();
 
-                if (createData.code !== 200) {
-                    throw new Error(createData.msg || `API Error: ${createData.code}`);
+                console.log('API Response Status:', createRes.status);
+                const createData = await createRes.json();
+                console.log('API Response Data:', createData);
+
+                if (createData.code !== 200 && !createData.taskId) {
+                    throw new Error(createData.error || createData.msg || `API Error: ${createData.code || createRes.status}`);
                 }
 
                 // If guest user, increment free counter

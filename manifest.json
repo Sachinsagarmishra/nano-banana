@@ -1,5 +1,5 @@
 {
-    "name": "Nano Banana Pro by sachindesign.com",
+    "name": "Nano Banana Pro v2",
     "id": "nano-banana-pro-ai-generator",
     "api": "1.0.0",
     "main": "code.js",
@@ -16,7 +16,8 @@
             "https://*.aiquickdraw.com",
             "https://0x0.st",
             "https://nano-banana-mu-lemon.vercel.app",
-            "https://*.vercel.app"
+            "https://*.vercel.app",
+            "https://cdnjs.cloudflare.com"
         ]
     }
 }
