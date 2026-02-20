@@ -1625,7 +1625,7 @@
             </div>
             <div class="plans-footer">
                 Secure payment via Dodo Payments. Credits do not expire.<br>
-                For compliance, write to <a href="mailto:tatosdeveloper@gmail.com">tatosdeveloper@gmail.com</a>
+                For compliance, write to <a href="mailto:hi@sachindesign.com">hi@sachindesign.com</a>
             </div>
         </div>
     </div>
@@ -2554,10 +2554,17 @@
 
         // ─── GENERATE IMAGE (via Vercel API) ───
         async function generateImage() {
-            // Check if user needs to sign up
+            // Guest mode: allow 2 free generations without login
             if (!state.user && state.freeUsed >= FREE_GENERATIONS) {
                 showSignupWall();
                 showToast('Sign up to continue generating!', 'info');
+                return;
+            }
+
+            // Logged-in user: must have credits (no free generations after login)
+            if (state.user && (state.user.credits === undefined || state.user.credits <= 0)) {
+                buyCredits();
+                showToast('You need credits to generate! Please select a plan.', 'info');
                 return;
             }
 

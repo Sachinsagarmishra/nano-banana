@@ -10,7 +10,7 @@ create table if not exists public.profiles (
   full_name text default '',
   avatar_url text default '',
   role text default 'user' check (role in ('user', 'admin', 'super_admin')),
-  credits integer default 10,
+  credits integer default 0,
   total_generations integer default 0,
   is_active boolean default true,
   created_at timestamptz default now(),
@@ -64,7 +64,7 @@ create trigger on_auth_user_created
 -- 5. Insert default settings
 insert into public.app_settings (key, value, label) values
   ('kie_api_key', '72ca6ff81a2fb81444f16ebcf5b4dd41', 'Kie AI API Key'),
-  ('max_credits_free', '10', 'Max Free Credits'),
+  ('max_credits_free', '2', 'Guest Free Generations (without login)'),
   ('credits_per_generation', '1', 'Credits Per Generation')
 on conflict (key) do nothing;
 

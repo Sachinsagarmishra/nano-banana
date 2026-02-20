@@ -827,9 +827,10 @@
                         </div>
                     </div>
                     <div class="setting-item">
-                        <div class="setting-title"><i class="fa-solid fa-ticket" style="margin-right:4px;"></i> Max
-                            Free Credits</div>
-                        <div class="setting-desc">Default credits for new users</div>
+                        <div class="setting-title"><i class="fa-solid fa-ticket" style="margin-right:4px;"></i> Guest
+                            Free Generations</div>
+                        <div class="setting-desc">Free generations allowed without login (guest mode only). Logged-in
+                            users get 0 credits until they buy a plan.</div>
                         <div class="api-key-field">
                             <input class="form-input" id="maxCreditsInput" type="number" />
                             <button class="btn btn-sm btn-primary"
@@ -1227,7 +1228,7 @@
                 const settings = {};
                 data.settings.forEach(s => settings[s.key] = s.value);
                 document.getElementById('apiKeyInput').value = settings.kie_api_key || '';
-                document.getElementById('maxCreditsInput').value = settings.max_credits_free || '10';
+                document.getElementById('maxCreditsInput').value = settings.max_credits_free || '2';
                 document.getElementById('creditsPerGenInput').value = settings.credits_per_generation || '1';
 
                 document.getElementById('dodoEnvInput').value = settings.dodo_environment || 'test_mode';
