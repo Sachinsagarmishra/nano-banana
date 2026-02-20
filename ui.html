@@ -1144,15 +1144,48 @@
             color: var(--primary);
             font-weight: 600;
         }
+
+        /* ─── Signup Wall ─── */
+        .signup-wall-msg {
+            font-size: 12px;
+            color: var(--muted-foreground);
+            margin-bottom: 16px;
+            padding: 12px;
+            background: rgba(245, 197, 24, 0.08);
+            border: 1px solid rgba(245, 197, 24, 0.2);
+            border-radius: 8px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .signup-wall-msg strong {
+            color: var(--primary);
+        }
+
+        .free-counter {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            background: rgba(245, 197, 24, 0.12);
+            color: var(--primary);
+            font-weight: 600;
+        }
     </style>
 </head>
 
 <body>
-    <!-- Auth Overlay -->
-    <div class="auth-overlay" id="authOverlay">
+    <!-- Auth Overlay (hidden by default — shown after free credits used) -->
+    <div class="auth-overlay hidden" id="authOverlay">
         <div class="auth-logo">🍌</div>
         <div class="auth-title">Nano Banana Pro</div>
-        <div class="auth-sub">Sign in to start generating images</div>
+        <div class="auth-sub" id="authSubText">Create a free account to continue generating</div>
+        <div class="signup-wall-msg" id="signupWallMsg">
+            You've used your <strong>2 free generations</strong>!<br>
+            Sign up to get more credits and keep creating.
+        </div>
         <div class="auth-form" id="loginForm">
             <div class="form-group">
                 <input class="input" id="authEmail" type="email" placeholder="Email" />
@@ -1160,13 +1193,13 @@
             <div class="form-group">
                 <input class="input" id="authPassword" type="password" placeholder="Password" />
             </div>
-            <div class="form-group hidden" id="nameField">
+            <div class="form-group" id="nameField">
                 <input class="input" id="authName" type="text" placeholder="Full Name" />
             </div>
-            <button class="auth-btn" id="authBtn" onclick="handleAuth()">Sign In</button>
+            <button class="auth-btn" id="authBtn" onclick="handleAuth()">Create Free Account</button>
             <div class="auth-toggle">
-                <span id="authToggleText">Don't have an account?</span>
-                <a id="authToggleLink" onclick="toggleAuthMode()">Sign Up</a>
+                <span id="authToggleText">Already have an account?</span>
+                <a id="authToggleLink" onclick="toggleAuthMode()">Sign In</a>
             </div>
         </div>
     </div>
@@ -1365,6 +1398,7 @@
 
     <script>
         // ─── State ───
+        const FREE_GENERATIONS = 2;
         const state = {
             referenceImages: [],
             figmaRefs: [],
@@ -1373,7 +1407,8 @@
             selection: null,
             authToken: localStorage.getItem('nb_token'),
             user: null,
-            isSignUp: false
+            isSignUp: true, // default to signup mode
+            freeUsed: parseInt(localStorage.getItem('nb_free_used') || '0')
         };
 
         const MAX_REFERENCE_IMAGES = 8;
@@ -1399,9 +1434,10 @@
         function toggleAuthMode() {
             state.isSignUp = !state.isSignUp;
             document.getElementById('nameField').classList.toggle('hidden', !state.isSignUp);
-            document.getElementById('authBtn').textContent = state.isSignUp ? 'Create Account' : 'Sign In';
+            document.getElementById('authBtn').textContent = state.isSignUp ? 'Create Free Account' : 'Sign In';
             document.getElementById('authToggleText').textContent = state.isSignUp ? 'Already have an account?' : "Don't have an account?";
             document.getElementById('authToggleLink').textContent = state.isSignUp ? 'Sign In' : 'Sign Up';
+            document.getElementById('signupWallMsg').style.display = state.isSignUp ? 'block' : 'none';
         }
 
         async function handleAuth() {
@@ -1447,22 +1483,32 @@
 
         function showMainUI() {
             document.getElementById('authOverlay').classList.add('hidden');
-            // Update header with user info
-            const u = state.user;
-            if (u) {
-                const initial = (u.full_name || u.email || '?')[0].toUpperCase();
-                const credits = u.credits !== undefined ? u.credits : '?';
-                const badgeArea = document.querySelector('.header-right');
-                // Add credits pill before theme toggle if not already there
-                if (!document.getElementById('creditsPill')) {
-                    const pill = document.createElement('span');
-                    pill.className = 'credits-pill';
-                    pill.id = 'creditsPill';
-                    pill.innerHTML = `✨ ${credits}`;
-                    pill.title = `${credits} credits remaining`;
-                    badgeArea.insertBefore(pill, badgeArea.firstChild);
-                }
+            updateCreditsDisplay();
+        }
+
+        function updateCreditsDisplay() {
+            const badgeArea = document.querySelector('.header-right');
+            const existingPill = document.getElementById('creditsPill');
+            if (existingPill) existingPill.remove();
+
+            const pill = document.createElement('span');
+            pill.className = 'free-counter';
+            pill.id = 'creditsPill';
+
+            if (state.user) {
+                const credits = state.user.credits !== undefined ? state.user.credits : '?';
+                pill.innerHTML = `✨ ${credits} credits`;
+                pill.title = `${credits} credits remaining`;
+            } else {
+                const freeLeft = Math.max(0, FREE_GENERATIONS - state.freeUsed);
+                pill.innerHTML = `🎁 ${freeLeft} free`;
+                pill.title = `${freeLeft} free generation(s) remaining`;
             }
+            badgeArea.insertBefore(pill, badgeArea.firstChild);
+        }
+
+        function showSignupWall() {
+            document.getElementById('authOverlay').classList.remove('hidden');
         }
 
         function pluginLogout() {
@@ -1470,18 +1516,19 @@
             state.authToken = null;
             state.user = null;
             document.getElementById('authOverlay').classList.remove('hidden');
-            const pill = document.getElementById('creditsPill');
-            if (pill) pill.remove();
+            updateCreditsDisplay();
         }
 
         // ─── Init ───
         window.onload = async () => {
             initTheme();
             parent.postMessage({ pluginMessage: { type: 'get-selection-info' } }, '*');
-            // Check auth
+            // Check if logged in
             if (await checkExistingSession()) {
                 showMainUI();
             }
+            // Always update credits display
+            updateCreditsDisplay();
         };
 
         // ─── Messages from Plugin Backend ───
@@ -1732,6 +1779,13 @@
 
         // ─── GENERATE IMAGE (via Vercel API) ───
         async function generateImage() {
+            // Check if user needs to sign up
+            if (!state.user && state.freeUsed >= FREE_GENERATIONS) {
+                showSignupWall();
+                showToast('Sign up to continue generating!', 'info');
+                return;
+            }
+
             const prompt = document.getElementById('promptInput').value.trim();
             if (!prompt) {
                 showToast('Please enter a prompt', 'error');
@@ -1795,6 +1849,13 @@
 
                 if (createData.code !== 200) {
                     throw new Error(createData.msg || `API Error: ${createData.code}`);
+                }
+
+                // If guest user, increment free counter
+                if (!state.user) {
+                    state.freeUsed++;
+                    localStorage.setItem('nb_free_used', state.freeUsed);
+                    updateCreditsDisplay();
                 }
 
                 const taskId = createData.data.taskId;
