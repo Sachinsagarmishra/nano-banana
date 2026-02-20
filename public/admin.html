@@ -720,6 +720,7 @@
                                 <th>User</th>
                                 <th>Role</th>
                                 <th>Credits</th>
+                                <th>Plan</th>
                                 <th>Generations</th>
                                 <th>Status</th>
                                 <th>Actions</th>
@@ -824,18 +825,6 @@
                                     class="fa-solid fa-eye"></i></button>
                             <button class="btn btn-sm btn-primary"
                                 onclick="saveSetting('kie_api_key', document.getElementById('apiKeyInput').value)">Save</button>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-title"><i class="fa-solid fa-ticket" style="margin-right:4px;"></i> Guest
-                            Free Generations</div>
-                        <div class="setting-desc">How many FREE image generations are allowed WITHOUT login (guest
-                            visitors). After login, user gets 0 credits and must buy a plan. Set to 0 to disable guest
-                            mode.</div>
-                        <div class="api-key-field">
-                            <input class="form-input" id="maxCreditsInput" type="number" />
-                            <button class="btn btn-sm btn-primary"
-                                onclick="saveSetting('max_credits_free', document.getElementById('maxCreditsInput').value)">Save</button>
                         </div>
                     </div>
                     <div class="setting-item">
@@ -1031,6 +1020,7 @@
             </td>
             <td><span class="role-badge ${p.role}">${p.role}</span></td>
             <td>${p.credits}</td>
+            <td>${p.active_plan_name ? `<span style="color:var(--accent);font-size:11px;font-weight:600;">${p.active_plan_name}</span>` : '<span style="color:var(--fg3);font-size:11px;">No Plan</span>'}</td>
             <td>${p.total_generations}</td>
             <td><span class="status-dot ${p.is_active ? 'active' : 'inactive'}"></span>${p.is_active ? 'Active' : 'Inactive'}</td>
             <td>

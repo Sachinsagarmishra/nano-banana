@@ -1732,6 +1732,9 @@
                         <div style="padding: 8px 14px; font-size: 11px; color: var(--muted-foreground);"
                             id="userMenuEmail">Account</div>
                         <div class="user-menu-divider"></div>
+                        <button class="user-menu-item" onclick="syncProfile(); closeUserMenu();">
+                            <i class="fa-solid fa-arrows-rotate"></i> Refresh Balance
+                        </button>
                         <button class="user-menu-item" onclick="buyCredits(); closeUserMenu();">
                             <i class="fa-solid fa-bolt"></i> Top Up Credits
                         </button>
@@ -2169,6 +2172,29 @@
             document.getElementById('authOverlay').classList.remove('hidden');
         }
 
+        async function syncProfile() {
+            if (!state.authToken) return;
+            const menuEmail = document.getElementById('userMenuEmail');
+            if (menuEmail) {
+                const prev = menuEmail.innerHTML;
+                menuEmail.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing...';
+                try {
+                    const res = await fetch(`${VERCEL_URL}/api/auth/profile`, {
+                        headers: { 'Authorization': `Bearer ${state.authToken}` }
+                    });
+                    const data = await res.json();
+                    if (data.profile) {
+                        state.user = data.profile;
+                        localStorage.setItem('nb_user', JSON.stringify(state.user));
+                        updateCreditsDisplay();
+                    }
+                } catch (e) {
+                    console.error('Sync failed', e);
+                }
+                menuEmail.innerHTML = prev;
+            }
+        }
+
         function pluginLogout() {
             if (!state.user) {
                 showSignupWall();
@@ -2256,6 +2282,9 @@
                 showSignupWall();
                 return;
             }
+
+            // Sync latest credits when opening the UI
+            await syncProfile();
 
             // Update balance badge in popup
             const credits = state.user.credits !== undefined ? state.user.credits : '?';
