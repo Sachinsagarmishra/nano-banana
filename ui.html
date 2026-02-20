@@ -1669,6 +1669,7 @@
 
         // ─── Init ───
         window.onload = async () => {
+            console.log("🍌 Nano Banana Pro V2 - BUILD 3 - Initialization started");
             initTheme();
             parent.postMessage({ pluginMessage: { type: 'get-selection-info' } }, '*');
 
@@ -2153,9 +2154,12 @@
                 await pollTaskStatus(taskId);
 
             } catch (error) {
-                showStatus('<i class="fa-regular fa-circle-xmark"></i>', 'Error', error.message, false, 0);
-                showToast('Error: ' + error.message, 'error');
+                console.error('Generation Error:', error);
+                showStatus('❌', 'Error', error.message, false);
                 resetGenerateBtn();
+                showToast(error.message, 'error');
+                // Added alert to make errors unmissable
+                alert("Generation Error: " + error.message);
             }
         }
 
