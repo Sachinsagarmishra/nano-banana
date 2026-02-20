@@ -743,6 +743,19 @@
                     </div>
                 </div>
 
+                <div
+                    style="background: rgba(59, 130, 246, 0.1); border: 1px solid var(--info); border-radius: var(--radius); padding: 16px; margin-bottom: 24px; font-size: 13px;">
+                    <strong>ℹ️ How to setup subscriptions:</strong>
+                    <ul style="margin-top: 8px; margin-left: 20px; color: var(--fg2);">
+                        <li>First, go to your Dodo Payments Dashboard under <strong>Products</strong> and create your
+                            subscription plans (e.g. "Pro Monthly").</li>
+                        <li>Copy the <strong>Product ID</strong> (starts with <code>prod_</code>).</li>
+                        <li>Come back here, enter the Name, paste the Product ID, and define how many credits this plan
+                            will grant the user upon purchase.</li>
+                        <li>Click "Create" and it will immediately show up in the Figma Plugin for users to buy!</li>
+                    </ul>
+                </div>
+
                 <div class="card" style="padding: 24px; margin-bottom: 24px;">
                     <div class="card-title" style="margin-bottom: 16px;">Add New Plan</div>
                     <div class="settings-grid">
@@ -840,6 +853,24 @@
                     <div class="page-title"><i class="fa-solid fa-money-bill-wave" style="margin-right:8px;"></i> Dodo
                         Payments Settings</div>
                     <div class="page-desc">Configure your Dodo Payments integration for subscriptions</div>
+                </div>
+
+                <div
+                    style="background: rgba(245, 197, 24, 0.1); border: 1px solid var(--accent); border-radius: var(--radius); padding: 16px; margin-bottom: 24px; font-size: 13px; color: var(--fg);">
+                    <strong>🔧 Webhook Setup Instructions:</strong>
+                    <ol style="margin-top: 8px; margin-left: 20px; color: var(--fg2); line-height: 1.6;">
+                        <li>Go to Dodo Payments Dashboard -> <strong>Developers</strong> -> <strong>Webhooks</strong>.
+                        </li>
+                        <li>Click "Add Webhook Endpoint".</li>
+                        <li><strong>Endpoint URL:</strong> <code
+                                style="background:rgba(0,0,0,0.5); padding:2px 6px; border-radius:4px; color:var(--accent);">https://nano-banana-mu-lemon.vercel.app/api/payments/webhook</code>
+                        </li>
+                        <li><strong>Events to Subscribe:</strong> Select <code
+                                style="color:var(--info);">payment.succeeded</code> and <code
+                                style="color:var(--info);">subscription.active</code>.</li>
+                        <li>Click "Add Endpoint". Dodo will give you a <strong>Webhook Secret</strong>. Copy it and
+                            paste it in the field below.</li>
+                    </ol>
                 </div>
 
                 <div class="settings-grid">
