@@ -1,6 +1,7 @@
 {
   "name": "nano-banana-pro",
   "version": "1.0.0",
+  "type": "module",
   "description": "Figma plugin for AI image generation using Nano Banana Pro model by Kie AI",
   "main": "code.js",
   "scripts": {
@@ -19,5 +20,8 @@
   "devDependencies": {
     "@figma/plugin-typings": "^1.0.0",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.97.0"
   }
 }

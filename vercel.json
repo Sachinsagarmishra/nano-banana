@@ -16,6 +16,14 @@
             "dest": "/api/$1"
         },
         {
+            "src": "/admin",
+            "dest": "/public/admin.html"
+        },
+        {
+            "src": "/admin.html",
+            "dest": "/public/admin.html"
+        },
+        {
             "src": "/(.*)",
             "dest": "/public/$1"
         }

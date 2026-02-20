@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nano Banana Pro — Admin Dashboard</title>
+    <meta name="description" content="Super Admin Dashboard for Nano Banana Pro" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <style>
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0f;
+            --bg2: #111118;
+            --bg3: #1a1a24;
+            --fg: #f4f4f5;
+            --fg2: #a1a1aa;
+            --fg3: #71717a;
+            --border: #27272a;
+            --accent: #f5c518;
+            --accent2: #e6a800;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--fg);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ─── Layout ─── */
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 10;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 8px 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .sidebar-logo span:first-child {
+            font-size: 28px;
+        }
+
+        .sidebar-logo .logo-text {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .sidebar-logo .logo-sub {
+            font-size: 11px;
+            color: var(--fg3);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--fg2);
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.15s;
+            margin-bottom: 2px;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: var(--bg3);
+            color: var(--fg);
+        }
+
+        .nav-item.active {
+            background: rgba(245, 197, 24, 0.1);
+            color: var(--accent);
+        }
+
+        .nav-item .icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .nav-item .badge {
+            margin-left: auto;
+            background: var(--accent);
+            color: #000;
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .main {
+            margin-left: 260px;
+            flex: 1;
+            padding: 32px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .page-desc {
+            color: var(--fg3);
+            font-size: 13px;
+        }
+
+        /* ─── Cards ─── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+        }
+
+        .stat-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--fg3);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-sub {
+            font-size: 11px;
+            color: var(--fg3);
+            margin-top: 4px;
+        }
+
+        /* ─── Table ─── */
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 20px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--fg3);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 12px 20px;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .user-email {
+            font-size: 11px;
+            color: var(--fg3);
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .role-badge.super_admin {
+            background: rgba(245, 197, 24, 0.15);
+            color: var(--accent);
+        }
+
+        .role-badge.admin {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--info);
+        }
+
+        .role-badge.user {
+            background: rgba(113, 113, 122, 0.15);
+            color: var(--fg3);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .status-dot.active {
+            background: var(--success);
+        }
+
+        .status-dot.inactive {
+            background: var(--danger);
+        }
+
+        /* ─── Forms ─── */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--fg2);
+            margin-bottom: 6px;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--fg);
+            font-size: 13px;
+            font-family: inherit;
+            transition: border-color 0.15s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--bg3);
+            color: var(--fg);
+            transition: all 0.15s;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            border-color: var(--fg3);
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent2);
+        }
+
+        .btn-danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* ─── Settings ─── */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .setting-item {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+        }
+
+        .setting-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .setting-desc {
+            font-size: 11px;
+            color: var(--fg3);
+            margin-bottom: 12px;
+        }
+
+        .api-key-field {
+            display: flex;
+            gap: 8px;
+        }
+
+        .api-key-field input {
+            flex: 1;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        /* ─── Sections ─── */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* ─── Login ─── */
+        .login-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--bg);
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .login-logo {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .login-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .login-sub {
+            color: var(--fg3);
+            font-size: 13px;
+            margin-bottom: 24px;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .toast {
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: slideIn 0.3s ease;
+            min-width: 200px;
+        }
+
+        .toast.success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: var(--success);
+        }
+
+        .toast.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--danger);
+        }
+
+        .toast.info {
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--info);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--fg3);
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toasts"></div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-wrap">
+        <div class="login-card">
+            <div class="login-logo">🍌</div>
+            <div class="login-title">Nano Banana Pro</div>
+            <div class="login-sub">Admin Dashboard — Sign in to continue</div>
+            <div class="form-group">
+                <input class="form-input" id="loginEmail" type="email" placeholder="admin@email.com" />
+            </div>
+            <div class="form-group">
+                <input class="form-input" id="loginPassword" type="password" placeholder="Password" />
+            </div>
+            <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="login()">🔐 Sign In</button>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboardScreen" class="layout hidden">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <span>🍌</span>
+                <div>
+                    <div class="logo-text">Nano Banana Pro</div>
+                    <div class="logo-sub">Admin Dashboard</div>
+                </div>
+            </div>
+
+            <a class="nav-item active" onclick="showSection('overview')">
+                <span class="icon">📊</span> Overview
+            </a>
+            <a class="nav-item" onclick="showSection('users')">
+                <span class="icon">👥</span> Users
+                <span class="badge" id="userCount">0</span>
+            </a>
+            <a class="nav-item" onclick="showSection('settings')">
+                <span class="icon">⚙️</span> Settings
+            </a>
+
+            <div class="sidebar-footer">
+                <a class="nav-item" onclick="logout()">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main -->
+        <div class="main">
+
+            <!-- Overview Section -->
+            <div class="section active" id="sec-overview">
+                <div class="page-header">
+                    <div class="page-title">📊 Dashboard Overview</div>
+                    <div class="page-desc">Welcome back, <strong id="adminName">Admin</strong></div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Users</div>
+                        <div class="stat-value" id="statUsers">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Active Users</div>
+                        <div class="stat-value" id="statActive">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Generations</div>
+                        <div class="stat-value" id="statGenerations">—</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Admins</div>
+                        <div class="stat-value" id="statAdmins">—</div>
+                    </div>
+                </div>
+
+                <!-- Recent Users Preview -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">👥 Recent Users</div>
+                        <button class="btn btn-sm" onclick="showSection('users')">View All →</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>Credits</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentUsersTable">
+                            <tr>
+                                <td colspan="4" class="loading">Loading</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div class="section" id="sec-users">
+                <div class="page-header">
+                    <div class="page-title">👥 User Management</div>
+                    <div class="page-desc">Manage users, roles, credits, and access</div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">All Users</div>
+                        <button class="btn btn-sm btn-primary" onclick="loadUsers()">🔄 Refresh</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>Credits</th>
+                                <th>Generations</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable">
+                            <tr>
+                                <td colspan="6" class="loading">Loading</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div class="section" id="sec-settings">
+                <div class="page-header">
+                    <div class="page-title">⚙️ Settings</div>
+                    <div class="page-desc">Manage API keys and application settings</div>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <div class="setting-title">🔑 Kie AI API Key</div>
+                        <div class="setting-desc">API key used for Nano Banana Pro image generation</div>
+                        <div class="api-key-field">
+                            <input class="form-input" id="apiKeyInput" type="password" />
+                            <button class="btn btn-sm" onclick="toggleApiKey()">👁</button>
+                            <button class="btn btn-sm btn-primary" onclick="saveApiKey()">Save</button>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-title">🎫 Max Free Credits</div>
+                        <div class="setting-desc">Default credits for new users</div>
+                        <div class="api-key-field">
+                            <input class="form-input" id="maxCreditsInput" type="number" />
+                            <button class="btn btn-sm btn-primary"
+                                onclick="saveSetting('max_credits_free', document.getElementById('maxCreditsInput').value)">Save</button>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-title">💳 Credits Per Generation</div>
+                        <div class="setting-desc">Credits deducted per AI image generation</div>
+                        <div class="api-key-field">
+                            <input class="form-input" id="creditsPerGenInput" type="number" />
+                            <button class="btn btn-sm btn-primary"
+                                onclick="saveSetting('credits_per_generation', document.getElementById('creditsPerGenInput').value)">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ─── Config ───
+        const API_BASE = ''; // relative when hosted on Vercel
+        let authToken = localStorage.getItem('admin_token');
+        let currentUser = null;
+
+        // ─── Auth ───
+        async function login() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            if (!email || !password) return toast('Enter email and password', 'error');
+
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (data.error) return toast(data.error, 'error');
+
+                if (!data.profile || !['admin', 'super_admin'].includes(data.profile.role)) {
+                    return toast('Admin access required', 'error');
+                }
+
+                authToken = data.session.access_token;
+                localStorage.setItem('admin_token', authToken);
+                currentUser = data.profile;
+                showDashboard();
+            } catch (e) {
+                toast('Login failed: ' + e.message, 'error');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('admin_token');
+            authToken = null;
+            currentUser = null;
+            document.getElementById('dashboardScreen').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+        }
+
+        async function checkAuth() {
+            if (!authToken) return false;
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/profile`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+                if (data.error || !data.profile) return false;
+                if (!['admin', 'super_admin'].includes(data.profile.role)) return false;
+                currentUser = data.profile;
+                return true;
+            } catch (e) { return false; }
+        }
+
+        async function showDashboard() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('dashboardScreen').classList.remove('hidden');
+            document.getElementById('adminName').textContent = currentUser?.full_name || currentUser?.email || 'Admin';
+            loadUsers();
+            loadSettings();
+        }
+
+        // ─── API Helper ───
+        function apiFetch(url, options = {}) {
+            return fetch(`${API_BASE}${url}`, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`,
+                    ...(options.headers || {})
+                }
+            }).then(r => r.json());
+        }
+
+        // ─── Users ───
+        async function loadUsers() {
+            try {
+                const data = await apiFetch('/api/admin/users');
+                if (data.error) return toast(data.error, 'error');
+
+                const { profiles, stats } = data;
+                document.getElementById('userCount').textContent = stats.totalUsers;
+                document.getElementById('statUsers').textContent = stats.totalUsers;
+                document.getElementById('statActive').textContent = stats.activeUsers;
+                document.getElementById('statGenerations').textContent = stats.totalGenerations;
+                document.getElementById('statAdmins').textContent = stats.admins;
+
+                // Full table
+                document.getElementById('usersTable').innerHTML = profiles.map(p => `
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="user-avatar">${(p.full_name || p.email)[0].toUpperCase()}</div>
+                <div>
+                  <div class="user-name">${p.full_name || '—'}</div>
+                  <div class="user-email">${p.email}</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="role-badge ${p.role}">${p.role}</span></td>
+            <td>${p.credits}</td>
+            <td>${p.total_generations}</td>
+            <td><span class="status-dot ${p.is_active ? 'active' : 'inactive'}"></span>${p.is_active ? 'Active' : 'Inactive'}</td>
+            <td>
+              <div class="action-btns">
+                ${p.role !== 'super_admin' ? `
+                  <button class="btn btn-sm" onclick="toggleUserActive('${p.id}', ${!p.is_active})">${p.is_active ? '🚫' : '✅'}</button>
+                  <button class="btn btn-sm" onclick="changeRole('${p.id}', '${p.role}')">${p.role === 'admin' ? '👤' : '🛡️'}</button>
+                  <button class="btn btn-sm" onclick="addCredits('${p.id}', ${p.credits})">💳</button>
+                ` : '<span style="color:var(--fg3);font-size:11px;">Owner</span>'}
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+                // Recent users (top 5)
+                document.getElementById('recentUsersTable').innerHTML = profiles.slice(0, 5).map(p => `
+          <tr>
+            <td>
+              <div class="user-cell">
+                <div class="user-avatar">${(p.full_name || p.email)[0].toUpperCase()}</div>
+                <div>
+                  <div class="user-name">${p.full_name || '—'}</div>
+                  <div class="user-email">${p.email}</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="role-badge ${p.role}">${p.role}</span></td>
+            <td>${p.credits}</td>
+            <td><span class="status-dot ${p.is_active ? 'active' : 'inactive'}"></span>${p.is_active ? 'Active' : 'Inactive'}</td>
+          </tr>
+        `).join('');
+
+            } catch (e) {
+                toast('Failed to load users: ' + e.message, 'error');
+            }
+        }
+
+        async function toggleUserActive(userId, isActive) {
+            await apiFetch('/api/admin/users', {
+                method: 'PUT',
+                body: JSON.stringify({ userId, is_active: isActive })
+            });
+            toast(isActive ? 'User activated' : 'User deactivated', 'success');
+            loadUsers();
+        }
+
+        async function changeRole(userId, currentRole) {
+            const newRole = currentRole === 'admin' ? 'user' : 'admin';
+            await apiFetch('/api/admin/users', {
+                method: 'PUT',
+                body: JSON.stringify({ userId, role: newRole })
+            });
+            toast(`Role changed to ${newRole}`, 'success');
+            loadUsers();
+        }
+
+        async function addCredits(userId, currentCredits) {
+            const amount = prompt('Enter credits to add:', '10');
+            if (!amount) return;
+            await apiFetch('/api/admin/users', {
+                method: 'PUT',
+                body: JSON.stringify({ userId, credits: currentCredits + parseInt(amount) })
+            });
+            toast(`Added ${amount} credits`, 'success');
+            loadUsers();
+        }
+
+        // ─── Settings ───
+        async function loadSettings() {
+            try {
+                const data = await apiFetch('/api/admin/settings');
+                if (data.error) return;
+                const settings = {};
+                data.settings.forEach(s => settings[s.key] = s.value);
+                document.getElementById('apiKeyInput').value = settings.kie_api_key || '';
+                document.getElementById('maxCreditsInput').value = settings.max_credits_free || '10';
+                document.getElementById('creditsPerGenInput').value = settings.credits_per_generation || '1';
+            } catch (e) { }
+        }
+
+        async function saveApiKey() {
+            const value = document.getElementById('apiKeyInput').value.trim();
+            if (!value) return toast('API key cannot be empty', 'error');
+            await saveSetting('kie_api_key', value);
+        }
+
+        async function saveSetting(key, value) {
+            try {
+                const data = await apiFetch('/api/admin/settings', {
+                    method: 'PUT',
+                    body: JSON.stringify({ key, value })
+                });
+                if (data.error) return toast(data.error, 'error');
+                toast('Setting saved!', 'success');
+            } catch (e) {
+                toast('Failed to save: ' + e.message, 'error');
+            }
+        }
+
+        function toggleApiKey() {
+            const input = document.getElementById('apiKeyInput');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        // ─── Navigation ───
+        function showSection(name) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('sec-' + name).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event.currentTarget?.classList.add('active');
+        }
+
+        // ─── Toast ───
+        function toast(msg, type = 'info') {
+            const c = document.getElementById('toasts');
+            const t = document.createElement('div');
+            t.className = `toast ${type}`;
+            t.innerHTML = `<span>${{ success: '✅', error: '❌', info: 'ℹ️' }[type] || 'ℹ️'}</span><span>${msg}</span>`;
+            c.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+        }
+
+        // ─── Init ───
+        (async () => {
+            if (await checkAuth()) {
+                showDashboard();
+            }
+        })();
+    </script>
+</body>
+
+</html>

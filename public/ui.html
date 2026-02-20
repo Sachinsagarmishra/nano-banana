@@ -1014,10 +1014,163 @@
             color: var(--primary);
             text-decoration: underline;
         }
+
+        /* ─── Auth Overlay ─── */
+        .auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--background);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .auth-overlay.hidden {
+            display: none;
+        }
+
+        .auth-logo {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .auth-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .auth-sub {
+            font-size: 11px;
+            color: var(--muted-foreground);
+            margin-bottom: 20px;
+        }
+
+        .auth-form {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .auth-form .form-group {
+            margin-bottom: 10px;
+        }
+
+        .auth-form .input {
+            width: 100%;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), #e6a800);
+            color: #000;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 4px;
+        }
+
+        .auth-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .auth-toggle {
+            font-size: 11px;
+            color: var(--muted-foreground);
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        .auth-toggle a {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-toggle a:hover {
+            text-decoration: underline;
+        }
+
+        /* ─── Profile Badge ─── */
+        .profile-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 8px 3px 3px;
+            border-radius: 20px;
+            background: var(--muted);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 11px;
+            color: var(--muted-foreground);
+            transition: all 0.15s;
+        }
+
+        .profile-badge:hover {
+            border-color: var(--primary);
+        }
+
+        .profile-avatar {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: var(--primary-foreground);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .credits-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            background: rgba(245, 197, 24, 0.12);
+            color: var(--primary);
+            font-weight: 600;
+        }
     </style>
 </head>
 
 <body>
+    <!-- Auth Overlay -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-logo">🍌</div>
+        <div class="auth-title">Nano Banana Pro</div>
+        <div class="auth-sub">Sign in to start generating images</div>
+        <div class="auth-form" id="loginForm">
+            <div class="form-group">
+                <input class="input" id="authEmail" type="email" placeholder="Email" />
+            </div>
+            <div class="form-group">
+                <input class="input" id="authPassword" type="password" placeholder="Password" />
+            </div>
+            <div class="form-group hidden" id="nameField">
+                <input class="input" id="authName" type="text" placeholder="Full Name" />
+            </div>
+            <button class="auth-btn" id="authBtn" onclick="handleAuth()">Sign In</button>
+            <div class="auth-toggle">
+                <span id="authToggleText">Don't have an account?</span>
+                <a id="authToggleLink" onclick="toggleAuthMode()">Sign Up</a>
+            </div>
+        </div>
+    </div>
+
     <div class="app">
         <!-- Toast Container -->
         <div class="toast-container" id="toastContainer"></div>
@@ -1213,15 +1366,18 @@
     <script>
         // ─── State ───
         const state = {
-            referenceImages: [],       // { file: File, dataUrl: string }
-            figmaRefs: [],             // { dataUrl: string, name: string }
+            referenceImages: [],
+            figmaRefs: [],
             generatedImageUrl: null,
             isGenerating: false,
-            selection: null
+            selection: null,
+            authToken: localStorage.getItem('nb_token'),
+            user: null,
+            isSignUp: false
         };
 
         const MAX_REFERENCE_IMAGES = 8;
-        const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+        const MAX_FILE_SIZE = 30 * 1024 * 1024;
 
         // ─── Theme Toggle ───
         function toggleTheme() {
@@ -1239,12 +1395,93 @@
             document.getElementById('themeToggle').textContent = saved === 'dark' ? '🌙' : '☀️';
         }
 
+        // ─── Auth Functions ───
+        function toggleAuthMode() {
+            state.isSignUp = !state.isSignUp;
+            document.getElementById('nameField').classList.toggle('hidden', !state.isSignUp);
+            document.getElementById('authBtn').textContent = state.isSignUp ? 'Create Account' : 'Sign In';
+            document.getElementById('authToggleText').textContent = state.isSignUp ? 'Already have an account?' : "Don't have an account?";
+            document.getElementById('authToggleLink').textContent = state.isSignUp ? 'Sign In' : 'Sign Up';
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value;
+            if (!email || !password) return showToast('Enter email and password', 'error');
+
+            const endpoint = state.isSignUp ? '/api/auth/signup' : '/api/auth/login';
+            const body = { email, password };
+            if (state.isSignUp) body.full_name = document.getElementById('authName').value.trim();
+
+            try {
+                const res = await fetch(`${VERCEL_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (data.error) return showToast(data.error, 'error');
+
+                state.authToken = data.session.access_token;
+                state.user = data.profile || data.user;
+                localStorage.setItem('nb_token', state.authToken);
+                showMainUI();
+                showToast(state.isSignUp ? 'Account created!' : 'Welcome back!', 'success');
+            } catch (e) {
+                showToast('Auth failed: ' + e.message, 'error');
+            }
+        }
+
+        async function checkExistingSession() {
+            if (!state.authToken) return false;
+            try {
+                const res = await fetch(`${VERCEL_URL}/api/auth/profile`, {
+                    headers: { 'Authorization': `Bearer ${state.authToken}` }
+                });
+                const data = await res.json();
+                if (data.error || !data.profile) { localStorage.removeItem('nb_token'); return false; }
+                state.user = data.profile;
+                return true;
+            } catch (e) { return false; }
+        }
+
+        function showMainUI() {
+            document.getElementById('authOverlay').classList.add('hidden');
+            // Update header with user info
+            const u = state.user;
+            if (u) {
+                const initial = (u.full_name || u.email || '?')[0].toUpperCase();
+                const credits = u.credits !== undefined ? u.credits : '?';
+                const badgeArea = document.querySelector('.header-right');
+                // Add credits pill before theme toggle if not already there
+                if (!document.getElementById('creditsPill')) {
+                    const pill = document.createElement('span');
+                    pill.className = 'credits-pill';
+                    pill.id = 'creditsPill';
+                    pill.innerHTML = `✨ ${credits}`;
+                    pill.title = `${credits} credits remaining`;
+                    badgeArea.insertBefore(pill, badgeArea.firstChild);
+                }
+            }
+        }
+
+        function pluginLogout() {
+            localStorage.removeItem('nb_token');
+            state.authToken = null;
+            state.user = null;
+            document.getElementById('authOverlay').classList.remove('hidden');
+            const pill = document.getElementById('creditsPill');
+            if (pill) pill.remove();
+        }
+
         // ─── Init ───
-        window.onload = () => {
-            // Restore theme
+        window.onload = async () => {
             initTheme();
-            // Request selection info from Figma
             parent.postMessage({ pluginMessage: { type: 'get-selection-info' } }, '*');
+            // Check auth
+            if (await checkExistingSession()) {
+                showMainUI();
+            }
         };
 
         // ─── Messages from Plugin Backend ───
