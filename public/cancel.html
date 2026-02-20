@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Cancelled - Nano Banana Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #09090b;
+            --surface: #121215;
+            --surface-hover: #1f1f22;
+            --border: #27272a;
+            --primary: #facc15;
+            --primary-hover: #eab308;
+            --foreground: #fafafa;
+            --muted: #a1a1aa;
+            --destructive: #ef4444;
+            --destructive-glow: rgba(239, 68, 68, 0.2);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--foreground);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 50% -20%, var(--destructive-glow), transparent 60%);
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 48px;
+            background: rgba(18, 18, 21, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            max-width: 420px;
+            width: 90%;
+            position: relative;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon-wrapper {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.05));
+            border: 2px solid rgba(239, 68, 68, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 32px;
+            color: var(--destructive);
+            box-shadow: 0 0 30px var(--destructive-glow);
+            position: relative;
+        }
+
+        .icon-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--destructive);
+            animation: ripple 2s infinite cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1.6);
+                opacity: 0;
+            }
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 0 12px;
+            background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        p.subtitle {
+            font-size: 15px;
+            color: var(--muted);
+            line-height: 1.6;
+            margin: 0 0 32px;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-align: left;
+        }
+
+        .info-icon {
+            color: var(--muted);
+            font-size: 20px;
+        }
+
+        .info-text {
+            flex: 1;
+        }
+
+        .info-text h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--foreground);
+            margin: 0 0 4px;
+        }
+
+        .info-text p {
+            font-size: 12px;
+            color: var(--muted);
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .action-btn {
+            background: var(--surface-hover);
+            color: var(--foreground);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .action-btn:hover {
+            background: var(--border);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .footer-note {
+            margin-top: 24px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="icon-wrapper">
+            <i class="fa-solid fa-ban"></i>
+        </div>
+
+        <h1>Plan Cancelled</h1>
+        <p class="subtitle">Your subscription has been successfully cancelled.</p>
+
+        <div class="info-box">
+            <i class="fa-solid fa-calendar-check info-icon"></i>
+            <div class="info-text">
+                <h3>Credits remain active</h3>
+                <p>Your current unused credits will remain in your account until the end of your billing cycle. You
+                    won't be charged again.</p>
+            </div>
+        </div>
+
+        <a href="javascript:window.close();" class="action-btn" id="closeBtn">
+            <i class="fa-solid fa-arrow-left"></i> Close & Return to Plugin
+        </a>
+
+        <div class="footer-note">
+            We're sad to see you go! You can always reactivate later.
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('closeBtn').addEventListener('click', (e) => {
+            window.close();
+            setTimeout(() => {
+                e.target.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Please close this tab manually';
+                e.target.style.pointerEvents = 'none';
+            }, 300);
+        });
+    </script>
+</body>
+
+</html>

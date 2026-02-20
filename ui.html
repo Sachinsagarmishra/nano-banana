@@ -902,29 +902,40 @@
         /* ─── Toast ─── */
         .toast-container {
             position: fixed;
-            bottom: 12px;
-            left: 12px;
-            right: 12px;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             z-index: 2000;
             display: flex;
-            flex-direction: column-reverse;
-            gap: 4px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
             pointer-events: none;
+            transition: backdrop-filter 0.3s, background 0.3s;
+        }
+
+        .toast-container:has(.toast) {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.4);
+            pointer-events: auto;
         }
 
         .toast {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 11px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             pointer-events: auto;
-            animation: toastIn 0.3s ease-out;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
             max-width: 320px;
-            margin: 0 auto;
+            text-align: center;
         }
 
         .toast.success {
@@ -948,12 +959,12 @@
         @keyframes toastIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(20px) scale(0.9);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
 
@@ -1706,6 +1717,27 @@
         </div>
     </div>
 
+    <!-- Cancel Confirmation Modal -->
+    <div class="plans-overlay hidden" id="cancelConfirmOverlay">
+        <div class="plans-container" style="max-width: 320px; text-align: center;">
+            <div style="font-size: 40px; color: var(--destructive); margin-bottom: 12px;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h2 style="margin: 0 0 12px; font-size: 18px; color: var(--foreground);">Cancel Subscription?</h2>
+            <p style="color: var(--muted-foreground); font-size: 13px; margin: 0 0 24px; line-height: 1.5;">
+                Your current month's credits will remain active.<br>
+                Cancellation takes effect from the next billing cycle.
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button class="btn"
+                    style="flex:1; background: var(--surface-hover); color: var(--foreground); padding: 12px; border:none; border-radius:8px; cursor:pointer;"
+                    onclick="document.getElementById('cancelConfirmOverlay').classList.add('hidden')">Keep Plan</button>
+                <button class="btn"
+                    style="flex:1; background: var(--destructive); color: white; padding: 12px; border:none; border-radius:8px; font-weight:600; cursor:pointer;"
+                    onclick="proceedCancelSubscription()">Yes, Cancel</button>
+            </div>
+        </div>
+    </div>
     <div class="app">
         <!-- Toast Container -->
         <div class="toast-container" id="toastContainer"></div>
@@ -2233,21 +2265,17 @@
             }
         });
 
-        async function cancelSubscription() {
+        function cancelSubscription() {
             if (!state.user || !state.user.dodo_subscription_id) {
                 showToast('No active subscription to cancel', 'error');
                 return;
             }
 
-            const confirmCancel = confirm(
-                'Are you sure you want to cancel your plan?\n\n' +
-                '• Your current month\'s credits will remain active\n' +
-                '• Cancellation takes effect from next billing cycle\n' +
-                '• You won\'t be charged again'
-            );
+            document.getElementById('cancelConfirmOverlay').classList.remove('hidden');
+        }
 
-            if (!confirmCancel) return;
-
+        async function proceedCancelSubscription() {
+            document.getElementById('cancelConfirmOverlay').classList.add('hidden');
             showToast('Cancelling subscription...', 'info');
 
             try {
@@ -2269,8 +2297,14 @@
                 state.user.subscription_cancelled = true;
                 localStorage.setItem('nb_user', JSON.stringify(state.user));
 
-                showToast('Plan cancelled! Credits remain active until end of billing period.', 'success');
+                showToast('Plan cancelled! Redirecting...', 'success');
                 updateCreditsDisplay();
+
+                // Open the cancel "thank you" page
+                setTimeout(() => {
+                    window.open(`${VERCEL_URL}/cancel.html`, '_blank');
+                }, 1000);
+
             } catch (err) {
                 console.error('Cancel error:', err);
                 showToast('Failed to cancel: ' + err.message, 'error');
