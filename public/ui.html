@@ -1508,6 +1508,12 @@
         }
 
         function showSignupWall() {
+            state.isSignUp = true;
+            document.getElementById('nameField').classList.remove('hidden');
+            document.getElementById('authBtn').textContent = 'Create Free Account';
+            document.getElementById('authToggleText').textContent = 'Already have an account?';
+            document.getElementById('authToggleLink').textContent = 'Sign In';
+            document.getElementById('signupWallMsg').style.display = 'block';
             document.getElementById('authOverlay').classList.remove('hidden');
         }
 
