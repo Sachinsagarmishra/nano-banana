@@ -1,7 +1,6 @@
 {
   "name": "nano-banana-pro",
   "version": "1.0.0",
-  "type": "module",
   "description": "Figma plugin for AI image generation using Nano Banana Pro model by Kie AI",
   "main": "code.js",
   "scripts": {

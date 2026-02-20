@@ -1,6 +1,6 @@
-import { getSupabaseAdmin, setCors } from '../../lib/supabase.js';
+const { getSupabaseAdmin, setCors } = require('../../lib/supabase.js');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
     setCors(res);
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -10,28 +10,17 @@ export default async function handler(req, res) {
         if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
         const supabase = getSupabaseAdmin();
-
         const { data, error } = await supabase.auth.admin.createUser({
-            email,
-            password,
-            email_confirm: true,
+            email, password, email_confirm: true,
             user_metadata: { full_name: full_name || '' }
         });
-
         if (error) return res.status(400).json({ error: error.message });
 
-        // Sign in immediately
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email, password
-        });
-
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) return res.status(400).json({ error: signInError.message });
 
-        return res.status(200).json({
-            user: signInData.user,
-            session: signInData.session
-        });
+        return res.status(200).json({ user: signInData.user, session: signInData.session });
     } catch (err) {
         return res.status(500).json({ error: err.message });
     }
-}
+};

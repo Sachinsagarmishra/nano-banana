@@ -1,4 +1,5 @@
 {
+    "buildCommand": "echo 'skip build'",
     "rewrites": [
         {
             "source": "/admin",
