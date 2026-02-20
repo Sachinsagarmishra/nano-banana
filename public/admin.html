@@ -874,50 +874,34 @@
                 </div>
 
                 <div class="settings-grid">
-                    <div class="setting-item">
+                    <div class="setting-item" style="grid-column: 1 / -1;">
                         <div class="setting-title">Environment Mode</div>
                         <div class="setting-desc">Toggle between test mode and live mode</div>
                         <div class="api-key-field">
-                            <select class="form-select" id="dodoEnvInput">
+                            <select class="form-select" id="dodoEnvInput" onchange="toggleDodoEnv()">
                                 <option value="test_mode">Test Mode</option>
                                 <option value="live_mode">Live Mode</option>
                             </select>
-                            <button class="btn btn-sm btn-primary"
-                                onclick="saveSetting('dodo_environment', document.getElementById('dodoEnvInput').value)">Save</button>
                         </div>
                     </div>
 
-                    <div class="setting-item">
+                    <div class="setting-item" id="dodoTestWrap">
                         <div class="setting-title">Test Secret Key</div>
                         <div class="setting-desc">Dodo Payments test environment API key</div>
                         <div class="api-key-field">
                             <input class="form-input" id="dodoTestKeyInput" type="password" />
                             <button class="btn btn-sm" onclick="toggleFieldVis(this)"><i
                                     class="fa-solid fa-eye"></i></button>
-                            <button class="btn btn-sm btn-primary"
-                                onclick="saveSetting('dodo_test_secret_key', document.getElementById('dodoTestKeyInput').value)">Save</button>
                         </div>
                     </div>
 
-                    <div class="setting-item">
+                    <div class="setting-item hidden" id="dodoLiveWrap" style="display: none;">
                         <div class="setting-title">Live Secret Key</div>
                         <div class="setting-desc">Dodo Payments live production API key</div>
                         <div class="api-key-field">
                             <input class="form-input" id="dodoLiveKeyInput" type="password" />
                             <button class="btn btn-sm" onclick="toggleFieldVis(this)"><i
                                     class="fa-solid fa-eye"></i></button>
-                            <button class="btn btn-sm btn-primary"
-                                onclick="saveSetting('dodo_live_secret_key', document.getElementById('dodoLiveKeyInput').value)">Save</button>
-                        </div>
-                    </div>
-
-                    <div class="setting-item">
-                        <div class="setting-title">Subscription Product ID</div>
-                        <div class="setting-desc">The Dodo product ID for the monthly subscription</div>
-                        <div class="api-key-field">
-                            <input class="form-input" id="dodoProductInput" type="text" />
-                            <button class="btn btn-sm btn-primary"
-                                onclick="saveSetting('dodo_product_id', document.getElementById('dodoProductInput').value)">Save</button>
                         </div>
                     </div>
 
@@ -928,10 +912,13 @@
                             <input class="form-input" id="dodoWebhookInput" type="password" />
                             <button class="btn btn-sm" onclick="toggleFieldVis(this)"><i
                                     class="fa-solid fa-eye"></i></button>
-                            <button class="btn btn-sm btn-primary"
-                                onclick="saveSetting('dodo_webhook_secret', document.getElementById('dodoWebhookInput').value)">Save</button>
                         </div>
                     </div>
+                </div>
+
+                <div style="margin-top: 24px; text-align: right;">
+                    <button class="btn btn-primary" id="dodoSaveBtn" onclick="saveAllDodo()">Save Dodo
+                        Configurations</button>
                 </div>
             </div>
 
@@ -1203,6 +1190,36 @@
         }
 
         // ─── Settings ───
+        function toggleDodoEnv() {
+            const isTest = document.getElementById('dodoEnvInput').value === 'test_mode';
+            document.getElementById('dodoTestWrap').style.display = isTest ? 'block' : 'none';
+            document.getElementById('dodoLiveWrap').style.display = isTest ? 'none' : 'block';
+        }
+
+        async function saveAllDodo() {
+            const btn = document.getElementById('dodoSaveBtn');
+            btn.innerHTML = 'Saving...';
+            btn.disabled = true;
+
+            const settings = [
+                { key: 'dodo_environment', value: document.getElementById('dodoEnvInput').value },
+                { key: 'dodo_test_secret_key', value: document.getElementById('dodoTestKeyInput').value },
+                { key: 'dodo_live_secret_key', value: document.getElementById('dodoLiveKeyInput').value },
+                { key: 'dodo_webhook_secret', value: document.getElementById('dodoWebhookInput').value }
+            ];
+
+            try {
+                for (const s of settings) {
+                    await apiFetch('/api/admin/settings', { method: 'PUT', body: JSON.stringify(s) });
+                }
+                toast('All Dodo settings saved successfully!', 'success');
+            } catch (err) {
+                toast('Failed to save some settings', 'error');
+            }
+            btn.innerHTML = 'Save Configurations';
+            btn.disabled = false;
+        }
+
         async function loadSettings() {
             try {
                 const data = await apiFetch('/api/admin/settings');
@@ -1216,8 +1233,9 @@
                 document.getElementById('dodoEnvInput').value = settings.dodo_environment || 'test_mode';
                 document.getElementById('dodoTestKeyInput').value = settings.dodo_test_secret_key || '';
                 document.getElementById('dodoLiveKeyInput').value = settings.dodo_live_secret_key || '';
-                document.getElementById('dodoProductInput').value = settings.dodo_product_id || '';
                 document.getElementById('dodoWebhookInput').value = settings.dodo_webhook_secret || '';
+
+                toggleDodoEnv();
             } catch (e) { }
         }
 
