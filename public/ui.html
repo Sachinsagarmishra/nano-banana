@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nano Banana Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* ─── CSS Variables — Dark Mode (default) ─── */
         :root,
@@ -1265,7 +1266,7 @@
             <div class="header-right">
                 <div class="profile-area">
                     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"
-                        title="Toggle Light/Dark Mode">🌙</button>
+                        title="Toggle Light/Dark Mode"><i class="fa-regular fa-moon"></i></button>
                     <div class="user-circle" id="userCircle" onclick="pluginLogout()" title="Click to Logout">
                         <span id="userInitial">?</span>
                     </div>
@@ -1281,7 +1282,7 @@
             <div class="section">
                 <div class="section-header" onclick="toggleSection('reference')">
                     <div class="section-header-left">
-                        <div class="section-icon ref">🖼</div>
+                        <div class="section-icon ref"><i class="fa-regular fa-image"></i></div>
                         <span class="section-title">Reference Images</span>
                     </div>
                     <span class="section-chevron" id="chevron-reference">▼</span>
@@ -1302,9 +1303,10 @@
 
                     <!-- Tabs: Upload / Figma Selection -->
                     <div class="tabs">
-                        <button class="tab active" id="tab-upload" onclick="switchRefTab('upload')">📤 PC
-                            Upload</button>
-                        <button class="tab" id="tab-figma" onclick="switchRefTab('figma')">🎨 From Figma</button>
+                        <button class="tab active" id="tab-upload" onclick="switchRefTab('upload')"><i
+                                class="fa-regular fa-upload"></i> PC Upload</button>
+                        <button class="tab" id="tab-figma" onclick="switchRefTab('figma')"><i
+                                class="fa-regular fa-object-group"></i> From Figma</button>
                     </div>
 
                     <!-- Upload Tab Content (Help text only now) -->
@@ -1318,16 +1320,17 @@
                     <div id="tab-content-figma" class="hidden">
                         <div id="selectionArea" style="margin-top: 8px;">
                             <div class="selection-empty" id="noSelection">
-                                <div class="selection-empty-icon">🔍</div>
+                                <div class="selection-empty-icon"><i class="fa-regular fa-hourglass-half"></i></div>
                                 <div>Select an element on the canvas to use as reference</div>
                             </div>
                             <div class="selection-card hidden" id="selectionCard">
-                                <div class="selection-card-icon">🎯</div>
+                                <div class="selection-card-icon"><i class="fa-regular fa-square-check"></i></div>
                                 <div class="selection-card-info">
                                     <div class="selection-card-name" id="selectionName">-</div>
                                     <div class="selection-card-type" id="selectionType">-</div>
                                 </div>
-                                <button class="btn btn-sm" onclick="exportSelection()">📸 Capture</button>
+                                <button class="btn btn-sm" onclick="exportSelection()"><i
+                                        class="fa-regular fa-camera"></i> Capture</button>
                             </div>
                         </div>
                     </div>
@@ -1338,7 +1341,7 @@
             <div class="section">
                 <div class="section-header" onclick="toggleSection('prompt')">
                     <div class="section-header-left">
-                        <div class="section-icon prompt">✨</div>
+                        <div class="section-icon prompt"><i class="fa-regular fa-comment-dots"></i></div>
                         <span class="section-title">Prompt</span>
                     </div>
                     <span class="section-chevron" id="chevron-prompt">▼</span>
@@ -1362,7 +1365,7 @@
             <div class="section">
                 <div class="section-header" onclick="toggleSection('settings')">
                     <div class="section-header-left">
-                        <div class="section-icon settings">⚙️</div>
+                        <div class="section-icon settings"><i class="fa-regular fa-compass"></i></div>
                         <span class="section-title">Settings</span>
                     </div>
                     <span class="section-chevron" id="chevron-settings">▼</span>
@@ -1474,13 +1477,13 @@
             const next = current === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', next);
             localStorage.setItem('nano_banana_theme', next);
-            document.getElementById('themeToggle').textContent = next === 'dark' ? '🌙' : '☀️';
+            document.getElementById('themeToggle').innerHTML = next === 'dark' ? '<i class="fa-regular fa-moon"></i>' : '<i class="fa-regular fa-sun"></i>';
         }
 
         function initTheme() {
             const saved = localStorage.getItem('nano_banana_theme') || 'dark';
             document.documentElement.setAttribute('data-theme', saved);
-            document.getElementById('themeToggle').textContent = saved === 'dark' ? '🌙' : '☀️';
+            document.getElementById('themeToggle').innerHTML = saved === 'dark' ? '<i class="fa-regular fa-moon"></i>' : '<i class="fa-regular fa-sun"></i>';
         }
 
         // ─── Auth Functions ───
@@ -1553,7 +1556,7 @@
 
             if (state.user) {
                 const credits = state.user.credits !== undefined ? state.user.credits : '?';
-                pill.innerHTML = `✨ ${credits} credits`;
+                pill.innerHTML = `<i class="fa-regular fa-star"></i> ${credits} credits`;
                 pill.title = `${credits} credits remaining`;
 
                 // Update Initial
@@ -1562,7 +1565,7 @@
                 userCircle.title = `Logged in as ${name} (Click to Logout)`;
             } else {
                 const freeLeft = Math.max(0, FREE_GENERATIONS - state.freeUsed);
-                pill.innerHTML = `🎁 ${freeLeft} free`;
+                pill.innerHTML = `<i class="fa-regular fa-gift"></i> ${freeLeft} free`;
                 pill.title = `${freeLeft} free generation(s) remaining`;
 
                 userInitial.textContent = '?';
@@ -1909,7 +1912,7 @@
             // Disable button
             const btn = document.getElementById('generateBtn');
             btn.disabled = true;
-            btn.innerHTML = '<span class="status-icon spinning">⏳</span><span>Generating...</span>';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin-pulse"></i><span>Generating...</span>';
             state.isGenerating = true;
 
             // Hide previous result
@@ -1924,15 +1927,15 @@
                 let uploadedUrls = [];
 
                 if (allDataUrls.length > 0) {
-                    showStatus('📤', 'Uploading reference images...', `0 of ${allDataUrls.length}`, true, 'indeterminate');
+                    showStatus('<i class="fa-regular fa-cloud-arrow-up"></i>', 'Uploading reference images...', `0 of ${allDataUrls.length}`, true, 'indeterminate');
 
                     for (let i = 0; i < allDataUrls.length; i++) {
-                        showStatus('📤', `Uploading image ${i + 1} of ${allDataUrls.length}...`, '', true, 'indeterminate');
+                        showStatus('<i class="fa-regular fa-cloud-arrow-up"></i>', `Uploading image ${i + 1} of ${allDataUrls.length}...`, '', true, 'indeterminate');
                         const url = await uploadImageToHost(allDataUrls[i]);
                         uploadedUrls.push(url);
                     }
 
-                    showStatus('✅', 'Images uploaded!', `${uploadedUrls.length} ready`, false, null);
+                    showStatus('<i class="fa-regular fa-circle-check"></i>', 'Images uploaded!', `${uploadedUrls.length} ready`, false, null);
                 }
 
                 // Step 2: Create generation task via Vercel API
@@ -1940,7 +1943,7 @@
                 const resolution = document.getElementById('resolution').value;
                 const outputFormat = document.getElementById('outputFormat').value;
 
-                showStatus('🚀', 'Creating generation task...', 'Sending to Kie AI', true, 'indeterminate');
+                showStatus('<i class="fa-regular fa-paper-plane"></i>', 'Creating generation task...', 'Sending to Kie AI', true, 'indeterminate');
 
                 const createRes = await fetch(`${VERCEL_URL}/api/generate`, {
                     method: 'POST',
@@ -1971,13 +1974,13 @@
                 }
 
                 const taskId = createData.data.taskId;
-                showStatus('⏳', 'Task created! Generating...', `Task: ${taskId.substring(0, 12)}...`, true, 'indeterminate');
+                showStatus('<i class="fa-regular fa-clock"></i>', 'Task created! Generating...', `Task: ${taskId.substring(0, 12)}...`, true, 'indeterminate');
 
                 // Step 3: Poll for results via Vercel API
                 await pollTaskStatus(taskId);
 
             } catch (error) {
-                showStatus('❌', 'Error', error.message, false, 0);
+                showStatus('<i class="fa-regular fa-circle-xmark"></i>', 'Error', error.message, false, 0);
                 showToast('Error: ' + error.message, 'error');
                 resetGenerateBtn();
             }
@@ -1990,7 +1993,7 @@
             const poll = async () => {
                 attempts++;
                 if (attempts > MAX_POLL_ATTEMPTS) {
-                    showStatus('❌', 'Timed out', 'Task took too long', false, 0);
+                    showStatus('<i class="fa-regular fa-circle-xmark"></i>', 'Timed out', 'Task took too long', false, 0);
                     showToast('Task timed out after 6 minutes', 'error');
                     resetGenerateBtn();
                     return;
@@ -2007,7 +2010,7 @@
                     const data = await res.json();
 
                     if (data.code !== 200) {
-                        showStatus('⚠️', 'Query error', data.msg || '', true, 'indeterminate');
+                        showStatus('<i class="fa-regular fa-circle-question"></i>', 'Query error', data.msg || '', true, 'indeterminate');
                         setTimeout(poll, POLL_INTERVAL);
                         return;
                     }
