@@ -37,9 +37,24 @@ module.exports = async function handler(req, res) {
 
         const data = await response.json();
 
-        if (data.code === 200 && userId) {
-            await supabase.from('generation_logs').insert({ user_id: userId, prompt, task_id: data.data.taskId, status: 'pending', aspect_ratio: aspectRatio, resolution });
-            await supabase.from('profiles').update({ credits: Math.max(0, (user.profile.credits || 1) - 1), total_generations: (user.profile.total_generations || 0) + 1 }).eq('id', userId);
+        if (data.code === 200) {
+            // Log the generation (userId will be null for guests)
+            await supabase.from('generation_logs').insert({
+                user_id: userId,
+                prompt,
+                task_id: data.data.taskId,
+                status: 'pending',
+                aspect_ratio: aspectRatio,
+                resolution
+            });
+
+            // Deduct credits only if user is logged in
+            if (userId && user?.profile) {
+                await supabase.from('profiles').update({
+                    credits: Math.max(0, (user.profile.credits || 1) - 1),
+                    total_generations: (user.profile.total_generations || 0) + 1
+                }).eq('id', userId);
+            }
         }
 
         return res.status(200).json(data);
