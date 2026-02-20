@@ -1029,6 +1029,7 @@
                   <button class="btn btn-sm" onclick="toggleUserActive('${p.id}', ${!p.is_active})">${p.is_active ? '<i class="fa-solid fa-circle-xmark"></i>' : '<i class="fa-solid fa-circle-check"></i>'}</button>
                   <button class="btn btn-sm" onclick="changeRole('${p.id}', '${p.role}')">${p.role === 'admin' ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-solid fa-shield"></i>'}</button>
                   <button class="btn btn-sm" onclick="addCredits('${p.id}', ${p.credits})"><i class="fa-solid fa-credit-card"></i></button>
+                  ${adminData.role === 'super_admin' ? `<button class="btn btn-sm" style="color:var(--destructive);" onclick="deleteUser('${p.id}', '${p.email}')" title="Delete User"><i class="fa-solid fa-trash"></i></button>` : ''}
                 ` : '<span style="color:var(--fg3);font-size:11px;">Owner</span>'}
               </div>
             </td>
@@ -1096,6 +1097,22 @@
             });
             toast(`Credits updated to ${newCredits}`, 'success');
             loadUsers();
+        }
+
+        async function deleteUser(userId, email) {
+            const confirmed = confirm(`Are you sure you want to permanently delete the user ${email}?\n\nThis will remove their profile, access, and credits. This cannot be undone.`);
+            if (!confirmed) return;
+
+            try {
+                await apiFetch('/api/admin/users', {
+                    method: 'DELETE',
+                    body: JSON.stringify({ userId })
+                });
+                toast(`User ${email} deleted successfully`, 'success');
+                loadUsers();
+            } catch (err) {
+                toast(`Failed to delete user: ${err.message}`, 'error');
+            }
         }
 
         // ─── Theme ───
