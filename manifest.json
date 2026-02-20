@@ -3,7 +3,7 @@
     "id": "nano-banana-pro-ai-generator",
     "api": "1.0.0",
     "main": "code.js",
-    "ui": "ui.html",
+    "ui": "ui-v3.html",
     "documentAccess": "dynamic-page",
     "editorType": [
         "figma"
