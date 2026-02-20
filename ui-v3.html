@@ -1337,7 +1337,7 @@
             <div class="header-right">
                 <div class="profile-area">
                     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()"
-                        title="Toggle Light/Dark Mode"><i class="fa-regular fa-moon"></i></button>
+                        title="Toggle Light/Dark Mode"><i class="fa-solid fa-moon"></i></button>
                     <div class="user-circle" id="userCircle" onclick="pluginLogout()" title="Click to Logout">
                         <span id="userInitial">?</span>
                     </div>
@@ -1353,7 +1353,7 @@
             <div class="section">
                 <div class="section-header" onclick="toggleSection('reference')">
                     <div class="section-header-left">
-                        <div class="section-icon ref"><i class="fa-regular fa-image"></i></div>
+                        <div class="section-icon ref"><i class="fa-solid fa-image"></i></div>
                         <span class="section-title">Reference Images</span>
                     </div>
                     <span class="section-chevron" id="chevron-reference">▼</span>
@@ -1375,9 +1375,9 @@
                     <!-- Tabs: Upload / Figma Selection -->
                     <div class="tabs">
                         <button class="tab active" id="tab-upload" onclick="switchRefTab('upload')"><i
-                                class="fa-regular fa-upload"></i> PC Upload</button>
+                                class="fa-solid fa-upload"></i> PC Upload</button>
                         <button class="tab" id="tab-figma" onclick="switchRefTab('figma')"><i
-                                class="fa-regular fa-object-group"></i> From Figma</button>
+                                class="fa-solid fa-object-group"></i> From Figma</button>
                     </div>
 
                     <!-- Upload Tab Content (Help text only now) -->
@@ -1391,17 +1391,17 @@
                     <div id="tab-content-figma" class="hidden">
                         <div id="selectionArea" style="margin-top: 8px;">
                             <div class="selection-empty" id="noSelection">
-                                <div class="selection-empty-icon"><i class="fa-regular fa-hourglass-half"></i></div>
+                                <div class="selection-empty-icon"><i class="fa-solid fa-hourglass-half"></i></div>
                                 <div>Select an element on the canvas to use as reference</div>
                             </div>
                             <div class="selection-card hidden" id="selectionCard">
-                                <div class="selection-card-icon"><i class="fa-regular fa-square-check"></i></div>
+                                <div class="selection-card-icon"><i class="fa-solid fa-square-check"></i></div>
                                 <div class="selection-card-info">
                                     <div class="selection-card-name" id="selectionName">-</div>
                                     <div class="selection-card-type" id="selectionType">-</div>
                                 </div>
                                 <button class="btn btn-sm" onclick="exportSelection()"><i
-                                        class="fa-regular fa-camera"></i> Capture</button>
+                                        class="fa-solid fa-camera"></i> Capture</button>
                             </div>
                         </div>
                     </div>
@@ -1412,7 +1412,7 @@
             <div class="section">
                 <div class="section-header" onclick="toggleSection('prompt')">
                     <div class="section-header-left">
-                        <div class="section-icon prompt"><i class="fa-regular fa-comment-dots"></i></div>
+                        <div class="section-icon prompt"><i class="fa-solid fa-comment-dots"></i></div>
                         <span class="section-title">Prompt</span>
                     </div>
                     <span class="section-chevron" id="chevron-prompt">▼</span>
@@ -1436,7 +1436,7 @@
             <div class="section">
                 <div class="section-header" onclick="toggleSection('settings')">
                     <div class="section-header-left">
-                        <div class="section-icon settings"><i class="fa-regular fa-compass"></i></div>
+                        <div class="section-icon settings"><i class="fa-solid fa-compass"></i></div>
                         <span class="section-title">Settings</span>
                     </div>
                     <span class="section-chevron" id="chevron-settings">▼</span>
@@ -1547,13 +1547,13 @@
             const next = current === 'dark' ? 'light' : 'dark';
             html.setAttribute('data-theme', next);
             localStorage.setItem('nano_banana_theme', next);
-            document.getElementById('themeToggle').innerHTML = next === 'dark' ? '<i class="fa-regular fa-moon"></i>' : '<i class="fa-regular fa-sun"></i>';
+            document.getElementById('themeToggle').innerHTML = next === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
         }
 
         function initTheme() {
             const saved = localStorage.getItem('nano_banana_theme') || 'dark';
             document.documentElement.setAttribute('data-theme', saved);
-            document.getElementById('themeToggle').innerHTML = saved === 'dark' ? '<i class="fa-regular fa-moon"></i>' : '<i class="fa-regular fa-sun"></i>';
+            document.getElementById('themeToggle').innerHTML = saved === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>';
         }
 
         // ─── Auth Functions ───
@@ -1626,7 +1626,7 @@
 
             if (state.user) {
                 const credits = state.user.credits !== undefined ? state.user.credits : '?';
-                pill.innerHTML = `<i class="fa-regular fa-star"></i> ${credits} credits`;
+                pill.innerHTML = `<i class="fa-solid fa-star"></i> ${credits} credits`;
                 pill.title = `${credits} credits remaining`;
                 pill.style.cursor = 'pointer';
                 pill.onclick = () => buyCredits();
@@ -1656,7 +1656,7 @@
                 userCircle.title = `Logged in as ${name} (Click to Logout)`;
             } else {
                 const freeLeft = Math.max(0, FREE_GENERATIONS - state.freeUsed);
-                pill.innerHTML = `<i class="fa-regular fa-gift"></i> ${freeLeft} free`;
+                pill.innerHTML = `<i class="fa-solid fa-gift"></i> ${freeLeft} free`;
                 pill.title = `${freeLeft} free generation(s) remaining`;
 
                 // Show Login Button instead of circle
@@ -2212,7 +2212,7 @@
                     payload: { prompt, imageInputCount: uploadedUrls.length }
                 });
 
-                showStatus('<i class="fa-regular fa-paper-plane"></i>', 'Creating generation task...', 'Sending to Kie AI', true, 'indeterminate');
+                showStatus('<i class="fa-solid fa-paper-plane"></i>', 'Creating generation task...', 'Sending to Kie AI', true, 'indeterminate');
 
                 const createRes = await fetch(`${VERCEL_URL}/api/generate`, {
                     method: 'POST',
@@ -2245,7 +2245,7 @@
                 }
 
                 const taskId = createData.data.taskId;
-                showStatus('<i class="fa-regular fa-clock"></i>', 'Task created! Generating...', `Task: ${taskId.substring(0, 12)}...`, true, 'indeterminate');
+                showStatus('<i class="fa-solid fa-clock"></i>', 'Task created! Generating...', `Task: ${taskId.substring(0, 12)}...`, true, 'indeterminate');
 
                 // Step 3: Poll for results via Vercel API
                 await pollTaskStatus(taskId);
@@ -2267,7 +2267,7 @@
             const poll = async () => {
                 attempts++;
                 if (attempts > MAX_POLL_ATTEMPTS) {
-                    showStatus('<i class="fa-regular fa-circle-xmark"></i>', 'Timed out', 'Task took too long', false, 0);
+                    showStatus('<i class="fa-solid fa-circle-xmark"></i>', 'Timed out', 'Task took too long', false, 0);
                     showToast('Task timed out after 6 minutes', 'error');
                     resetGenerateBtn();
                     return;
@@ -2284,7 +2284,7 @@
                     const data = await res.json();
 
                     if (data.code !== 200) {
-                        showStatus('<i class="fa-regular fa-circle-question"></i>', 'Query error', data.msg || '', true, 'indeterminate');
+                        showStatus('<i class="fa-solid fa-circle-question"></i>', 'Query error', data.msg || '', true, 'indeterminate');
                         setTimeout(poll, POLL_INTERVAL);
                         return;
                     }

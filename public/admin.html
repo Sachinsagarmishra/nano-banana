@@ -622,25 +622,25 @@
             </div>
 
             <a class="nav-item active" onclick="showSection('overview')">
-                <span class="icon"><i class="fa-regular fa-chart-bar"></i></span> Overview
+                <span class="icon"><i class="fa-solid fa-chart-simple"></i></span> Overview
             </a>
             <a class="nav-item" onclick="showSection('users')">
-                <span class="icon"><i class="fa-regular fa-user-group"></i></span> Users
+                <span class="icon"><i class="fa-solid fa-users"></i></span> Users
                 <span class="badge" id="userCount">0</span>
             </a>
             <a class="nav-item" onclick="showSection('subscriptions')">
-                <span class="icon"><i class="fa-regular fa-credit-card"></i></span> Subscriptions
+                <span class="icon"><i class="fa-solid fa-credit-card"></i></span> Subscriptions
             </a>
             <a class="nav-item" onclick="showSection('settings')">
-                <span class="icon"><i class="fa-regular fa-gear"></i></span> Settings
+                <span class="icon"><i class="fa-solid fa-gear"></i></span> Settings
             </a>
 
             <div class="sidebar-footer">
                 <a class="nav-item" id="themeToggle" onclick="toggleTheme()">
-                    <span class="icon"><i class="fa-regular fa-moon"></i></span> Dark Mode
+                    <span class="icon"><i class="fa-solid fa-moon"></i></span> Dark Mode
                 </a>
                 <a class="nav-item" onclick="logout()">
-                    <span class="icon"><i class="fa-regular fa-door-open"></i></span> Logout
+                    <span class="icon"><i class="fa-solid fa-door-open"></i></span> Logout
                 </a>
             </div>
         </div>
@@ -651,7 +651,7 @@
             <!-- Overview Section -->
             <div class="section active" id="sec-overview">
                 <div class="page-header">
-                    <div class="page-title"><i class="fa-regular fa-chart-bar" style="margin-right:8px;"></i> Dashboard
+                    <div class="page-title"><i class="fa-solid fa-chart-simple" style="margin-right:8px;"></i> Dashboard
                         Overview</div>
                     <div class="page-desc">Welcome back, <strong id="adminName">Admin</strong></div>
                 </div>
@@ -678,7 +678,7 @@
                 <!-- Recent Users Preview -->
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-title"><i class="fa-regular fa-user-group" style="margin-right:8px;"></i>
+                        <div class="card-title"><i class="fa-solid fa-users" style="margin-right:8px;"></i>
                             Recent Users</div>
                         <button class="btn btn-sm" onclick="showSection('users')">View All →</button>
                     </div>
@@ -703,7 +703,7 @@
             <!-- Users Section -->
             <div class="section" id="sec-users">
                 <div class="page-header">
-                    <div class="page-title"><i class="fa-regular fa-user-group" style="margin-right:8px;"></i> User
+                    <div class="page-title"><i class="fa-solid fa-users" style="margin-right:8px;"></i> User
                         Management</div>
                     <div class="page-desc">Manage users, roles, credits, and access</div>
                 </div>
@@ -737,7 +737,7 @@
             <!-- Subscriptions Section -->
             <div class="section" id="sec-subscriptions">
                 <div class="page-header">
-                    <div class="page-title"><i class="fa-regular fa-credit-card" style="margin-right:8px;"></i>
+                    <div class="page-title"><i class="fa-solid fa-credit-card" style="margin-right:8px;"></i>
                         Subscription Plans</div>
                     <div class="page-desc">Manage your Dodo Payments subscription products and the credits they grant
                     </div>
@@ -796,25 +796,25 @@
             <!-- Settings Section -->
             <div class="section" id="sec-settings">
                 <div class="page-header">
-                    <div class="page-title"><i class="fa-regular fa-gear" style="margin-right:8px;"></i> Settings</div>
+                    <div class="page-title"><i class="fa-solid fa-gear" style="margin-right:8px;"></i> Settings</div>
                     <div class="page-desc">Manage API keys and application settings</div>
                 </div>
 
                 <div class="settings-grid">
                     <div class="setting-item">
-                        <div class="setting-title"><i class="fa-regular fa-key" style="margin-right:4px;"></i> Kie AI
+                        <div class="setting-title"><i class="fa-solid fa-key" style="margin-right:4px;"></i> Kie AI
                             API Key</div>
                         <div class="setting-desc">API key used for Nano Banana Pro image generation</div>
                         <div class="api-key-field">
                             <input class="form-input" id="apiKeyInput" type="password" />
                             <button class="btn btn-sm" onclick="toggleFieldVis(this)"><i
-                                    class="fa-regular fa-eye"></i></button>
+                                    class="fa-solid fa-eye"></i></button>
                             <button class="btn btn-sm btn-primary"
                                 onclick="saveSetting('kie_api_key', document.getElementById('apiKeyInput').value)">Save</button>
                         </div>
                     </div>
                     <div class="setting-item">
-                        <div class="setting-title"><i class="fa-regular fa-ticket" style="margin-right:4px;"></i> Max
+                        <div class="setting-title"><i class="fa-solid fa-ticket" style="margin-right:4px;"></i> Max
                             Free Credits</div>
                         <div class="setting-desc">Default credits for new users</div>
                         <div class="api-key-field">
@@ -824,7 +824,7 @@
                         </div>
                     </div>
                     <div class="setting-item">
-                        <div class="setting-title"><i class="fa-regular fa-credit-card" style="margin-right:4px;"></i>
+                        <div class="setting-title"><i class="fa-solid fa-credit-card" style="margin-right:4px;"></i>
                             Credits Per Generation</div>
                         <div class="setting-desc">Credits deducted per AI image generation</div>
                         <div class="api-key-field">
@@ -862,7 +862,7 @@
                         <div class="api-key-field">
                             <input class="form-input" id="dodoTestKeyInput" type="password" />
                             <button class="btn btn-sm" onclick="toggleFieldVis(this)"><i
-                                    class="fa-regular fa-eye"></i></button>
+                                    class="fa-solid fa-eye"></i></button>
                             <button class="btn btn-sm btn-primary"
                                 onclick="saveSetting('dodo_test_secret_key', document.getElementById('dodoTestKeyInput').value)">Save</button>
                         </div>
@@ -874,7 +874,7 @@
                         <div class="api-key-field">
                             <input class="form-input" id="dodoLiveKeyInput" type="password" />
                             <button class="btn btn-sm" onclick="toggleFieldVis(this)"><i
-                                    class="fa-regular fa-eye"></i></button>
+                                    class="fa-solid fa-eye"></i></button>
                             <button class="btn btn-sm btn-primary"
                                 onclick="saveSetting('dodo_live_secret_key', document.getElementById('dodoLiveKeyInput').value)">Save</button>
                         </div>
@@ -896,7 +896,7 @@
                         <div class="api-key-field">
                             <input class="form-input" id="dodoWebhookInput" type="password" />
                             <button class="btn btn-sm" onclick="toggleFieldVis(this)"><i
-                                    class="fa-regular fa-eye"></i></button>
+                                    class="fa-solid fa-eye"></i></button>
                             <button class="btn btn-sm btn-primary"
                                 onclick="saveSetting('dodo_webhook_secret', document.getElementById('dodoWebhookInput').value)">Save</button>
                         </div>
@@ -1016,9 +1016,9 @@
             <td>
               <div class="action-btns">
                 ${p.role !== 'super_admin' ? `
-                  <button class="btn btn-sm" onclick="toggleUserActive('${p.id}', ${!p.is_active})">${p.is_active ? '<i class="fa-regular fa-circle-xmark"></i>' : '<i class="fa-regular fa-circle-check"></i>'}</button>
-                  <button class="btn btn-sm" onclick="changeRole('${p.id}', '${p.role}')">${p.role === 'admin' ? '<i class="fa-regular fa-user"></i>' : '<i class="fa-regular fa-shield"></i>'}</button>
-                  <button class="btn btn-sm" onclick="addCredits('${p.id}', ${p.credits})"><i class="fa-regular fa-credit-card"></i></button>
+                  <button class="btn btn-sm" onclick="toggleUserActive('${p.id}', ${!p.is_active})">${p.is_active ? '<i class="fa-solid fa-circle-xmark"></i>' : '<i class="fa-solid fa-circle-check"></i>'}</button>
+                  <button class="btn btn-sm" onclick="changeRole('${p.id}', '${p.role}')">${p.role === 'admin' ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-solid fa-shield"></i>'}</button>
+                  <button class="btn btn-sm" onclick="addCredits('${p.id}', ${p.credits})"><i class="fa-solid fa-credit-card"></i></button>
                 ` : '<span style="color:var(--fg3);font-size:11px;">Owner</span>'}
               </div>
             </td>
@@ -1101,7 +1101,7 @@
             localStorage.setItem('admin_theme', theme);
             const btn = document.getElementById('themeToggle');
             if (btn) {
-                btn.innerHTML = `<span class="icon">${theme === 'dark' ? '<i class="fa-regular fa-moon"></i>' : '<i class="fa-regular fa-sun"></i>'}</span> ${theme === 'dark' ? 'Dark Mode' : 'Light Mode'}`;
+                btn.innerHTML = `<span class="icon">${theme === 'dark' ? '<i class="fa-solid fa-moon"></i>' : '<i class="fa-solid fa-sun"></i>'}</span> ${theme === 'dark' ? 'Dark Mode' : 'Light Mode'}`;
             }
         }
 
@@ -1208,10 +1208,10 @@
             const icon = btnEl.querySelector('i');
             if (input.type === 'password') {
                 input.type = 'text';
-                icon.className = 'fa-regular fa-eye-slash';
+                icon.className = 'fa-solid fa-eye-slash';
             } else {
                 input.type = 'password';
-                icon.className = 'fa-regular fa-eye';
+                icon.className = 'fa-solid fa-eye';
             }
         }
 
@@ -1229,10 +1229,10 @@
             const t = document.createElement('div');
             t.className = `toast ${type}`;
             const icon = {
-                success: '<i class="fa-regular fa-circle-check"></i>',
-                error: '<i class="fa-regular fa-circle-xmark"></i>',
-                info: '<i class="fa-regular fa-circle-info"></i>'
-            }[type] || '<i class="fa-regular fa-circle-info"></i>';
+                success: '<i class="fa-solid fa-circle-check"></i>',
+                error: '<i class="fa-solid fa-circle-xmark"></i>',
+                info: '<i class="fa-solid fa-circle-info"></i>'
+            }[type] || '<i class="fa-solid fa-circle-info"></i>';
             t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
             c.appendChild(t);
             setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
