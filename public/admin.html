@@ -17,11 +17,12 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --bg: #0a0a0f;
-            --bg2: #111118;
-            --bg3: #1a1a24;
-            --fg: #f4f4f5;
+        :root,
+        [data-theme="dark"] {
+            --bg: #09090b;
+            --bg2: #0a0a0f;
+            --bg3: #18181b;
+            --fg: #fafafa;
             --fg2: #a1a1aa;
             --fg3: #71717a;
             --border: #27272a;
@@ -30,6 +31,22 @@
             --success: #22c55e;
             --danger: #ef4444;
             --info: #3b82f6;
+            --radius: 12px;
+        }
+
+        [data-theme="light"] {
+            --bg: #f8f8fa;
+            --bg2: #ffffff;
+            --bg3: #f1f5f9;
+            --fg: #09090b;
+            --fg2: #64748b;
+            --fg3: #94a3b8;
+            --border: #e2e8f0;
+            --accent: #e6a800;
+            --accent2: #f5c518;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --info: #2563eb;
             --radius: 12px;
         }
 
@@ -193,6 +210,7 @@
             font-weight: 800;
             background: linear-gradient(135deg, var(--accent), #fff);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -614,6 +632,9 @@
             </a>
 
             <div class="sidebar-footer">
+                <a class="nav-item" id="themeToggle" onclick="toggleTheme()">
+                    <span class="icon">🌙</span> Dark Mode
+                </a>
                 <a class="nav-item" onclick="logout()">
                     <span class="icon">🚪</span> Logout
                 </a>
@@ -906,14 +927,46 @@
         }
 
         async function addCredits(userId, currentCredits) {
-            const amount = prompt('Enter credits to add:', '10');
-            if (!amount) return;
+            const input = prompt('Enter credits to add (+10) or set absolute (=50):', '+10');
+            if (input === null) return;
+
+            let newCredits;
+            if (input.startsWith('=')) {
+                newCredits = parseInt(input.substring(1));
+            } else {
+                newCredits = currentCredits + parseInt(input.replace('+', ''));
+            }
+
+            if (isNaN(newCredits)) return toast('Invalid credits value', 'error');
+
             await apiFetch('/api/admin/users', {
                 method: 'PUT',
-                body: JSON.stringify({ userId, credits: currentCredits + parseInt(amount) })
+                body: JSON.stringify({ userId, credits: newCredits })
             });
-            toast(`Added ${amount} credits`, 'success');
+            toast(`Credits updated to ${newCredits}`, 'success');
             loadUsers();
+        }
+
+        // ─── Theme ───
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            setTheme(next);
+        }
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('admin_theme', theme);
+            const btn = document.getElementById('themeToggle');
+            if (btn) {
+                btn.innerHTML = `<span class="icon">${theme === 'dark' ? '🌙' : '☀️'}</span> ${theme === 'dark' ? 'Dark Mode' : 'Light Mode'}`;
+            }
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('admin_theme') || 'dark';
+            setTheme(saved);
         }
 
         // ─── Settings ───
@@ -973,6 +1026,7 @@
 
         // ─── Init ───
         (async () => {
+            initTheme();
             if (await checkAuth()) {
                 showDashboard();
             }
