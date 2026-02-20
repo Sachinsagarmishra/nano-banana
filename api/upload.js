@@ -18,9 +18,13 @@ module.exports = async function handler(req, res) {
         const ext = mime === 'image/jpeg' ? 'jpg' : mime === 'image/webp' ? 'webp' : 'png';
 
         const formData = new FormData();
-        formData.append('file', blob, `reference.${ext}`);
+        formData.append('reqtype', 'fileupload');
+        formData.append('time', '1h');
 
-        const uploadRes = await fetch('https://0x0.st', { method: 'POST', body: formData });
+        // Append the blob disguised as a file
+        formData.append('fileToUpload', blob, `reference.${ext}`);
+
+        const uploadRes = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', { method: 'POST', body: formData });
 
         if (!uploadRes.ok) {
             const errText = await uploadRes.text();
@@ -30,7 +34,7 @@ module.exports = async function handler(req, res) {
         const url = (await uploadRes.text()).trim();
         return res.status(200).json({ url });
     } catch (err) {
-        return res.status(500).json({ error: err.message });
+        return res.status(500).json({ error: err.message, stack: err.stack });
     }
 };
 
